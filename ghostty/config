@@ -1,6 +1,9 @@
 confirm-close-surface = false
 
+theme = Everforest Dark Hard
+
 font-family="Iosevka"
 font-size=14
 
 adjust-cell-height=30%
+
