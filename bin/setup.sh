@@ -11,6 +11,7 @@ sudo pacman -Syu waybar
 
 # Install wallpaper manager
 sudo pacman -Syu swaybg
+paru -Syu waypaper
 
 # Install graphical polkit
 sudo pacman -Syu polkit-gnome
