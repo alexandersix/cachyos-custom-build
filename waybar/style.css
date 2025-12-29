@@ -1,42 +1,48 @@
-@define-color bg    #1a1b26;
-@define-color fg    #a9b1d6;
-@define-color blk   #32344a;
-@define-color red   #f7768e;
-@define-color grn   #9ece6a;
-@define-color ylw   #e0af68;
-@define-color blu   #7aa2f7;
-@define-color mag   #ad8ee6;
-@define-color cyn   #0db9d7;
-@define-color brblk #444b6a;
-@define-color white #ffffff;
+@define-color fg      #d3c6aa;
+@define-color bg      #2d353b;
+@define-color red     #e67e80;
+@define-color green   #a7c080;
+@define-color yellow  #dbbc7f;
+@define-color blue    #7fbbb3;
+@define-color aqua    #83c092;
+@define-color purple  #d699b6;
 
 * {
-  font-family: "JetBrainsMono Nerd Font", monospace;
+  border: none;
+  border-radius: 0;
+  font-family: "Iosevka", monospace;
+  font-weight: 400;
   font-size: 16px;
-  font-weight: bold;
+  min-height: 0;
+}
+
+*:hover {
+  border: none;
+  border-radius: 0;
+  font-family: "Iosevka", monospace;
+  font-size: 16px;
+  font-weight: 400;
+  min-height: 0;
 }
 
 window#waybar {
   background-color: @bg;
   color: @fg;
+  opacity: 0.9;
 }
 
 #workspaces button {
-  padding: 0 6px;
-  color: @cyn;
-  background: transparent;
-  border-bottom: 3px solid @bg;
+  color: @green;
+  border-bottom: 2px solid transparent;
 }
+
 #workspaces button.active {
-  color: @cyn;
-  border-bottom: 3px solid @mag;
+  color: @green;
+  border-bottom: 2px solid @green;
 }
+
 #workspaces button.hidden {
-  color: @white;
-}
-#workspaces button.hidden.active {
-  color: @cyn;
-  border-bottom: 3px solid @mag;
+  color: @fg;
 }
 
 #workspaces button.urgent {
@@ -44,60 +50,70 @@ window#waybar {
 }
 
 button:hover {
-  background: inherit;
-  box-shadow: inset 0 -3px #ffffff;
+  background: @bg;
+  color: @fg;
+  border: 0 solid transparent;
 }
 
-#clock,
-#custom-sep,
-#battery,
-#cpu,
-#memory,
-#disk,
-#network,
-#tray {
-  padding: 0 8px;
-  color: @white;
+#custom-notification {
+  padding: 0 5px;
 }
 
-#custom-sep {
-  color: @brblk;
-}
-
-#clock {
-  color: @cyn;
-  border-bottom: 4px solid @cyn;
-}
-
-#battery {
-  color: @blu;
-  border-bottom: 4px solid @blu;
-}
-
-#disk {
-  color: @ylw;
-  border-bottom: 4px solid @ylw;
-}
-
-#memory {
-  color: @mag;
-  border-bottom: 4px solid @mag;
-}
-
-#cpu {
-  color: @grn;
-  border-bottom: 4px solid @grn;
-}
-
-#network {
-  color: @red;
-  border-bottom: 4px solid @red;
-}
-
-#network.disconnected {
-  background-color: @red;
-}
-
-#tray {
-  background-color: #2980b9;
-}
+/* button:hover { */
+/*   background: inherit; */
+/*   box-shadow: inset 0 -3px #ffffff; */
+/* } */
+/**/
+/* #clock, */
+/* #custom-sep, */
+/* #battery, */
+/* #cpu, */
+/* #memory, */
+/* #disk, */
+/* #network, */
+/* #tray { */
+/*   padding: 0 8px; */
+/*   color: @white; */
+/* } */
+/**/
+/* #custom-sep { */
+/*   color: @brblk; */
+/* } */
+/**/
+/* #clock { */
+/*   color: @cyn; */
+/*   border-bottom: 4px solid @cyn; */
+/* } */
+/**/
+/* #battery { */
+/*   color: @blu; */
+/*   border-bottom: 4px solid @blu; */
+/* } */
+/**/
+/* #disk { */
+/*   color: @ylw; */
+/*   border-bottom: 4px solid @ylw; */
+/* } */
+/**/
+/* #memory { */
+/*   color: @mag; */
+/*   border-bottom: 4px solid @mag; */
+/* } */
+/**/
+/* #cpu { */
+/*   color: @grn; */
+/*   border-bottom: 4px solid @grn; */
+/* } */
+/**/
+/* #network { */
+/*   color: @red; */
+/*   border-bottom: 4px solid @red; */
+/* } */
+/**/
+/* #network.disconnected { */
+/*   background-color: @red; */
+/* } */
+/**/
+/* #tray { */
+/*   background-color: #2980b9; */
+/* } */
