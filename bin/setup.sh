@@ -135,6 +135,32 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 git config --global user.email "alexanderhsix@gmail.com"
 git config --global user.name "Alex Six"
 
+# Set up themes
+# TODO: eventually, each premade theme directory should have its own setup.sh for this kind of stuff
+sudo pacman -Syu sassc gnome-themes-extra
+paru -Syu gtk-engine-murrine
+
+mkdir -p $HOME/.config/themes/gtk/
+git clone https://github.com/Fausto-Korpsvart/Everforest-GTK-Theme.git $HOME/.config/themes/gtk/everforest
+$HOME/.config/themes/gtk/everforest/themes/install.sh
+
+mkdir -p $HOME/.config/gtk-4.0/
+ln -s $HOME/.themes/Everforest-Dark/ $HOME/.config/gtk-4.0/
+
+themeName="Everforest-Dark"
+
+# gsettings gtk (needed for window decorations in non-flatpak apps)
+gsettings set org.gnome.desktop.interface gtk-theme "$themeName"
+sudo gsettings set org.gnome.desktop.interface gtk-theme "$themeName"
+
+# add new export
+echo "export GTK_THEME=$themeName" >>"$HOME/.zshrc"
+echo "export GTK_THEME=$themeName" | sudo tee --append "/root/.zshrc"
+
+# flatpak
+sudo flatpak override --filesystem=xdg-data/themes # only way to give access to /.local/share/themes
+sudo flatpak override --env=GTK_THEME="$themeName"
+
 # Dotfiles
 # Install them!
 
