@@ -5,14 +5,12 @@
 
 ## See https://github.com/alex-courtis/way-displays/wiki/Configuration
 
-
 ## Arrange displays in a ROW (default, left to right) or a COLUMN (top to bottom)
 ARRANGE: ROW
 
 ## Align ROWs at the TOP (default), MIDDLE or BOTTOM
 ## Align COLUMNs at the LEFT (default), MIDDLE or RIGHT
 ALIGN: TOP
-
 
 ## Displays are matched by name or description with precedence: exact, regex, fuzzy
 ##
@@ -24,21 +22,18 @@ ALIGN: TOP
 ## It is recommended to use the description rather than the nondeterministic name.
 ##
 ## Avoid using 'DP-1' as that will also match 'eDP-1'
-## 
+##
 ## Any item prefixed with a ! will be interpreted as extended POSIX regex e.g. '!^DP-1'. Regex strings must be single quoted.
-## 
+##
 ## Using a regex is preferred, however fuzzy case insensitive string matches of at least 3 characters may be used.
 ##
 ## 'DP-1' will match eDP-1 and DP-1. Consider using regex '!^DP-1$' to exactly match.
 
-
 ## The default ORDER is simply the order in which the displays are discovered. This is nondeterministic.
 ## You are encouraged to explicitly define your order.
-# ORDER:
-#   - '!^DP-1'
-#   - 'Monitor Maker ABC123'
-#   - 'HDMI-1'
-
+ORDER:
+  - "HDMI-A-1"
+  - "!^DP-1"
 
 ## Enable scaling, overrides AUTO_SCALE and SCALE
 SCALING: TRUE
@@ -86,10 +81,9 @@ AUTO_SCALE_MIN: 1.0
 #   - DP-2
 #   - '!.*my monitor.*'
 
-
 ## Sets a /bin/sh command to be executed following most events.
 ## Obeys LOG_THRESHOLD
-## ${CALLBACK_MSG} contains a human readable message 
+## ${CALLBACK_MSG} contains a human readable message
 ## ${CALLBACK_LEVEL} LOG_THRESHOLD
 ## NOTE: Depending on your compositor this could get executed multiple times when
 ## a change happens. Especially likely on a (dis-)connect.
@@ -99,11 +93,9 @@ CALLBACK_CMD: notify-send "way-displays ${CALLBACK_LEVEL}" "${CALLBACK_MSG}"
 ## your laptop is different.
 # LAPTOP_DISPLAY_PREFIX: 'eDP'
 
-
 ## One of: FATAL, ERROR, WARNING, INFO (default), DEBUG
 ## Applies to logs and callbacks
 LOG_THRESHOLD: INFO
-
 
 ## Disable the specified displays.
 ## Resulting state of a display is equal to OR of all matching conditions, so
