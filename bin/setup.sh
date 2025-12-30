@@ -33,6 +33,7 @@ sudo pacman -Syu ghostty
 sudo pacman -Syu sddm
 
 sudo systemctl enable sddm.service
+paru -Syu sddm-silent-theme
 
 # Copy default mango config
 mkdir ~/.config/mango
