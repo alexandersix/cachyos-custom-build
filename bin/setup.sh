@@ -10,8 +10,7 @@ paru -Syu mangowc-git
 sudo pacman -Syu waybar
 
 # Install wallpaper manager
-sudo pacman -Syu swaybg
-paru -Syu waypaper
+sudo pacman -Syu swww # TODO: change to awww once next swww release occurs (they're changing their name)
 
 # Install graphical polkit
 sudo pacman -Syu polkit-gnome
