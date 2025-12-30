@@ -38,6 +38,9 @@ paru -Syu sddm-silent-theme
 mkdir ~/.config/mango
 cp /etc/mango/config.conf ~/.config/mango/config.conf
 
+# Install browser
+paru -Syu omarchy-chromium-bin
+
 # Set up initial overrides (this will likely just be copying a default config)
 # Change terminal launch to SUPER Space = ghostty
 # Add browser keybind to SUPER b = firefox
