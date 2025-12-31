@@ -78,7 +78,7 @@ sudo pacman -Syu wl-clipboard cliphist
 
 # Install screenshot/screen recording packages
 sudo pacman -Syu grim slurp satty
-pary -Syu wl-screenrec
+paru -Syu wl-screenrec
 
 # Install night light
 sudo pacman -Syu wlsunset
