@@ -173,4 +173,29 @@ sudo flatpak override --env=GTK_THEME="$themeName"
 # Install them!
 
 # zshrc
-# Add {full path}/.config/bin to the path for scripts to work
+# Add $HOME/.config/bin to the path for scripts to work
+# Add $HOME/.config/composer to the path for scripts to work
+# Add $HOME/.local/bin to the path for uv to work
+
+# PHP
+sudo pacman -Syu php php-gd php-pgsql php-sqlite
+
+# Composer
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php -r "if (hash_file('sha384', 'composer-setup.php') === 'c8b085408188070d5f52bcfe4ecfbee5f727afa458b2573b8eaaf77b3419b0bf2768dc67c86944da1544f06fa544fd47') { echo 'Installer verified'.PHP_EOL; } else { echo 'Installer corrupt'.PHP_EOL; unlink('composer-setup.php'); exit(1); }"
+php composer-setup.php
+php -r "unlink('composer-setup.php');"
+
+sudo mv composer.phar /usr/local/bin/composer
+
+# Laravel Installer
+composer global require laravel/installer
+
+# SQL TUI/GUI
+paru -Syu tableplus
+
+# curl -LsSf https://astral.sh/uv/install.sh | sh
+sudo pacman -Syu uv
+uv tool install harlequin
+uv tool install 'harlequin[postgres]'
+uv tool install 'harlequin[mysql]'
