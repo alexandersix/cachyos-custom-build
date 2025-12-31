@@ -200,3 +200,9 @@ uv tool install 'harlequin[mysql]'
 # Had to move this b/c have not symlinked configs yet - should do that first, probably
 systemctl --user enable swww.service
 systemctl --user start swww.service
+
+# default applications
+paru -Syu selectdefaultapplication-git
+sudo pacman -Syu ristretto libreoffice-fresh okular
+
+# TODO: figure out how to programmatically set up the default applications w/ setdefaultapplication-git (or otherwise)
