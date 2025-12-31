@@ -12,6 +12,11 @@ sudo pacman -Syu waybar
 # Install wallpaper manager
 sudo pacman -Syu swww # TODO: change to awww once next swww release occurs (they're changing their name)
 
+# TODO: update symlink script (or write custom) to move this to `.config/systemd/user`
+
+systemctl --user enable swww.service
+systemctl --user start swww.service
+
 # Install graphical polkit
 sudo pacman -Syu polkit-gnome
 
