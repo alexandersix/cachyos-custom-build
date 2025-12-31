@@ -14,9 +14,6 @@ sudo pacman -Syu swww # TODO: change to awww once next swww release occurs (they
 
 # TODO: update symlink script (or write custom) to move this to `.config/systemd/user`
 
-systemctl --user enable swww.service
-systemctl --user start swww.service
-
 # Install graphical polkit
 sudo pacman -Syu polkit-gnome
 
@@ -199,3 +196,7 @@ sudo pacman -Syu uv
 uv tool install harlequin
 uv tool install 'harlequin[postgres]'
 uv tool install 'harlequin[mysql]'
+
+# Had to move this b/c have not symlinked configs yet - should do that first, probably
+systemctl --user enable swww.service
+systemctl --user start swww.service
