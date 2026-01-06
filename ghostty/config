@@ -7,3 +7,6 @@ font-size=14
 
 adjust-cell-height=30%
 
+quit-after-last-window-closed = false
+
+background-opacity = .90
