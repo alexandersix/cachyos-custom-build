@@ -78,7 +78,8 @@ sudo pacman -Syu wl-clipboard cliphist
 
 # Install screenshot/screen recording packages
 sudo pacman -Syu grim slurp satty
-paru -Syu wl-screenrec
+paru -Syu wl-screenrec wayfreeze-git
+mkdir $HOME/Pictures
 
 # Install night light
 sudo pacman -Syu wlsunset
@@ -198,6 +199,7 @@ uv tool install 'harlequin[postgres]'
 uv tool install 'harlequin[mysql]'
 
 # Had to move this b/c have not symlinked configs yet - should do that first, probably
+sudo loginctl enable-linger alexandersix
 systemctl --user enable swww.service
 systemctl --user start swww.service
 
