@@ -52,7 +52,7 @@ paru -Syu walker elephant elephant-desktopapplications elephant-providerlist
 elephant service enable
 systemctl --user start elephant.service
 
-sudo pacman -Syu rofi
+sudo pacman -Syu rofi rofi-emoji
 
 # Install brightness control
 sudo pacman -Syu brightnessctl
@@ -74,7 +74,7 @@ sudo pacman -Syu swayidle wlogout
 paru -Syu swaylock-effects-git wayland-logout
 
 # Install clipboard managment system
-sudo pacman -Syu wl-clipboard cliphist
+sudo pacman -Syu wl-clipboard cliphist wtype
 
 # Install screenshot/screen recording packages
 sudo pacman -Syu grim slurp satty
