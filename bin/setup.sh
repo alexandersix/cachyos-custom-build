@@ -81,6 +81,9 @@ sudo pacman -Syu grim slurp satty
 paru -Syu wl-screenrec wayfreeze-git
 mkdir $HOME/Pictures
 
+paru -Syu gpu-screen-recorder
+mkdir $HOME/Videos
+
 # Install night light
 sudo pacman -Syu wlsunset
 
@@ -204,7 +207,7 @@ systemctl --user enable swww.service
 systemctl --user start swww.service
 
 # default applications
-paru -Syu selectdefaultapplication-git
+paru -Syu selectdefaultapplication-git tmux obsidian obs-studio kdenlive gimp
 sudo pacman -Syu ristretto libreoffice-fresh okular
 
 # TODO: figure out how to programmatically set up the default applications w/ setdefaultapplication-git (or otherwise)
