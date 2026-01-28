@@ -1,148 +1,151 @@
 #!/bin/bash
 
 # Update the system packages installed w/ installer
-sudo pacman -Syu
+# sudo pacman -Syu
+
+# Install paru
+# sudo pacman -S --needed base-devel
+# git clone https://aur.archlinux.org/paru.git
+# cd paru
+# makepkg -si
 
 # Install the tiling window compositor
-paru -Syu mangowc-git
+# paru -Syu mangowc-git
 
 # Install waybar
-sudo pacman -Syu waybar
+# sudo pacman -Syu waybar
 
 # Install wallpaper manager
-sudo pacman -Syu swww # TODO: change to awww once next swww release occurs (they're changing their name)
+# sudo pacman -Syu swww # TODO: change to awww once next swww release occurs (they're changing their name)
 
 # TODO: update symlink script (or write custom) to move this to `.config/systemd/user`
 
 # Install graphical polkit
-sudo pacman -Syu polkit-gnome
+# sudo pacman -Syu polkit-gnome
 
 # Install keyring & GUI keyring manager
-sudo pacman -Syu gnome-keyring seahorse
+# sudo pacman -Syu gnome-keyring seahorse
 
 # Install notifications system
-sudo pacman -Syu swaync
-sudo usermod -a -G "${USER}"
+# sudo pacman -Syu swaync
+# sudo usermod -a -G "${USER}"
 
 # Install session system
-sudo pacman -Syu uwsm
+# sudo pacman -Syu uwsm
 
 # Install terminal emulator
-sudo pacman -Syu ghostty
+# sudo pacman -Syu ghostty
 
 # Install desktop greeter
-sudo pacman -Syu sddm
+# sudo pacman -Syu sddm
 
-sudo systemctl enable sddm.service
-paru -Syu sddm-silent-theme
+# sudo systemctl enable sddm.service
+# paru -Syu sddm-silent-theme
 
 # Copy default mango config
-mkdir ~/.config/mango
-cp /etc/mango/config.conf ~/.config/mango/config.conf
+# mkdir ~/.config/mango
+# cp /etc/mango/config.conf ~/.config/mango/config.conf
 
 # Install browser
-paru -Syu omarchy-chromium-bin python-hatchling
+# paru -Syu omarchy-chromium-bin python-hatchling
 
 # Set up initial overrides (this will likely just be copying a default config)
 # Change terminal launch to SUPER Space = ghostty
 # Add browser keybind to SUPER b = firefox
 
 # Install application launcher
-paru -Syu walker elephant elephant-desktopapplications elephant-providerlist
-elephant service enable
-systemctl --user start elephant.service
-
-sudo pacman -Syu rofi rofi-emoji
+# sudo pacman -Syu rofi rofi-emoji
 
 # Install brightness control
-sudo pacman -Syu brightnessctl
+# sudo pacman -Syu brightnessctl
 
 # Install volume packages
-sudo pacman -Syu pamixer pavucontrol wiremix
+# sudo pacman -Syu pamixer pavucontrol wiremix
 
 # Install bluetooth
-sudo pacman -Syu bluez bluez-utils blueman
+# sudo pacman -Syu bluez bluez-utils blueman
 
 # Install networking
-sudo pacman -Syu network-manager-applet nm-connection-editor
+# sudo pacman -Syu network-manager-applet nm-connection-editor
 
 # Install power profiles
-sudo pacman -Syu upower
+# sudo pacman -Syu upower
 
 # Install idle, lock, logout, etc.
-sudo pacman -Syu swayidle wlogout
-paru -Syu swaylock-effects-git wayland-logout
+# sudo pacman -Syu swayidle wlogout
+# paru -Syu swaylock-effects-git wayland-logout
 
 # Install clipboard managment system
-sudo pacman -Syu wl-clipboard cliphist wtype
+# sudo pacman -Syu wl-clipboard cliphist wtype
 
 # Install screenshot/screen recording packages
-sudo pacman -Syu grim slurp satty
-paru -Syu wl-screenrec wayfreeze-git
-mkdir $HOME/Pictures
+# sudo pacman -Syu grim slurp satty
+# paru -Syu wl-screenrec wayfreeze-git
+# mkdir $HOME/Pictures
 
-paru -Syu gpu-screen-recorder
-mkdir $HOME/Videos
+# paru -Syu gpu-screen-recorder wf-recorder
+# mkdir $HOME/Videos
+# mkdir $HOME/Videos/Screencasts
 
 # Install night light
-sudo pacman -Syu wlsunset
+# sudo pacman -Syu wlsunset
 
 # Install file managers
-sudo pacman -Syu nautilus yazi
+# sudo pacman -Syu nautilus yazi
 
 # Install theming systems
-sudo pacman -Syu nwg-look qt5ct qt6ct
+# sudo pacman -Syu nwg-look qt5ct qt6ct
 
 # Install monitor management
-sudo pacman -Syu wlr-randr
-paru -Syu way-displays
+# sudo pacman -Syu wlr-randr
+# paru -Syu way-displays
 
 # Install portals
-sudo pacman -Syu xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
+# sudo pacman -Syu xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 
 # Install videos & codecs
-sudo pacman -Syu vlc vlc-plugin-ffmpeg
+# sudo pacman -Syu vlc vlc-plugin-ffmpeg
 
 # Install gaming meta packages
-sudo pacman -Syu cachyos-gaming-meta cachyos-gaming-applications
+# sudo pacman -Syu cachyos-gaming-meta cachyos-gaming-applications
 
 # Install bolt OSRS launcher (likely should not be in the base package)
-paru -Syu bolt-launcher
+# paru -Syu bolt-launcher
 
 # Install virtualization systems
-sudo pacman -Syu libvirt gnome-boxes virt-manager qemu-full dnsmasq
-sudo usermod -aG libvirt $USER
-sudo systemctl enable --now libvirtd
+# sudo pacman -Syu libvirt gnome-boxes virt-manager qemu-full dnsmasq
+# sudo usermod -aG libvirt $USER
+# sudo systemctl enable --now libvirtd
 
 # Install Docker
-sudo pacman -Syu docker docker-buildx docker-compose
+# sudo pacman -Syu docker docker-buildx docker-compose
 
-sudo systemctl enable docker.service # change to `systemctl start` if you don't want to auto-start docker upon system boot
+# sudo systemctl enable docker.service # change to `systemctl start` if you don't want to auto-start docker upon system boot
 
-sudo usermod -aG docker $USER # add user to docker group to prevent needing `sudo`
+# sudo usermod -aG docker $USER # add user to docker group to prevent needing `sudo`
 
 # Install password manager
-curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --import # get signing key
+# curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --import # get signing key
 
-paru -Syu 1password 1password-cli
+# paru -Syu 1password 1password-cli
 
 # Install extra utilities
-sudo pacman -Syu github-cli imagemagick jq fzf flatpak git figlet wget unzip gum rsync neovim eza fastfetch gvfs btop lazygit
+# sudo pacman -Syu github-cli imagemagick jq fzf flatpak git figlet wget unzip gum rsync neovim eza fastfetch gvfs btop lazygit
 
-paru -Syu flatseal lazydocker
+# paru -Syu flatseal lazydocker
 
 # Set up fonts
-sudo pacman -Syu fontconfig font-manager ttc-iosevka
+# sudo pacman -Syu fontconfig font-manager ttc-iosevka
 
-mkdir $HOME/.fonts
+# mkdir $HOME/.fonts
 
 # Install languages
 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+# curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
 # Set up git
-git config --global user.email "alexanderhsix@gmail.com"
-git config --global user.name "Alex Six"
+# git config --global user.email "alexanderhsix@gmail.com"
+# git config --global user.name "Alex Six"
 
 # Set up themes
 # TODO: eventually, each premade theme directory should have its own setup.sh for this kind of stuff
@@ -179,35 +182,40 @@ sudo flatpak override --env=GTK_THEME="$themeName"
 # Add $HOME/.local/bin to the path for uv to work
 
 # PHP
-sudo pacman -Syu php php-gd php-pgsql php-sqlite
+# sudo pacman -Syu php php-gd php-pgsql php-sqlite
 
 # Composer
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('sha384', 'composer-setup.php') === 'c8b085408188070d5f52bcfe4ecfbee5f727afa458b2573b8eaaf77b3419b0bf2768dc67c86944da1544f06fa544fd47') { echo 'Installer verified'.PHP_EOL; } else { echo 'Installer corrupt'.PHP_EOL; unlink('composer-setup.php'); exit(1); }"
-php composer-setup.php
-php -r "unlink('composer-setup.php');"
+# php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+# php -r "if (hash_file('sha384', 'composer-setup.php') === 'c8b085408188070d5f52bcfe4ecfbee5f727afa458b2573b8eaaf77b3419b0bf2768dc67c86944da1544f06fa544fd47') { echo 'Installer verified'.PHP_EOL; } else { echo 'Installer corrupt'.PHP_EOL; unlink('composer-setup.php'); exit(1); }"
+# php composer-setup.php
+# php -r "unlink('composer-setup.php');"
 
-sudo mv composer.phar /usr/local/bin/composer
+# sudo mv composer.phar /usr/local/bin/composer
 
 # Laravel Installer
-composer global require laravel/installer
+# composer global require laravel/installer
 
 # SQL TUI/GUI
-paru -Syu tableplus
+# paru -Syu tableplus
 
 # curl -LsSf https://astral.sh/uv/install.sh | sh
-sudo pacman -Syu uv
-uv tool install harlequin
-uv tool install 'harlequin[postgres]'
-uv tool install 'harlequin[mysql]'
+# sudo pacman -Syu uv
+# uv tool install harlequin
+# uv tool install 'harlequin[postgres]'
+# uv tool install 'harlequin[mysql]'
 
 # Had to move this b/c have not symlinked configs yet - should do that first, probably
-sudo loginctl enable-linger alexandersix
-systemctl --user enable swww.service
-systemctl --user start swww.service
+# sudo loginctl enable-linger alexandersix
+# systemctl --user enable swww.service
+# systemctl --user start swww.service
 
 # default applications
-paru -Syu selectdefaultapplication-git tmux obsidian obs-studio kdenlive gimp
-sudo pacman -Syu ristretto libreoffice-fresh okular
+# paru -Syu selectdefaultapplication-git tmux obsidian obs-studio kdenlive gimp
+# sudo pacman -Syu ristretto libreoffice-fresh okular
+
+# opencode
+# curl -fsSL https://opencode.ai/install | bash
 
 # TODO: figure out how to programmatically set up the default applications w/ setdefaultapplication-git (or otherwise)
+#
+# TODO: Add steps from this GH repo for portal: https://github.com/emersion/xdg-desktop-portal-wlr
