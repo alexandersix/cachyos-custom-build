@@ -18,7 +18,7 @@ packages=(
   "imagemagick"
   "jq"
   "lazygit"
-  "natilus"
+  "nautilus"
   "neovim"
   "rsync"
   "unzip"
