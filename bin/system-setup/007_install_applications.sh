@@ -20,6 +20,7 @@ packages=(
   "lazygit"
   "nautilus"
   "neovim"
+  "qutebrowser"
   "rsync"
   "unzip"
   "wget"
