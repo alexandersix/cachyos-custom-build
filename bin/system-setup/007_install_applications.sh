@@ -18,16 +18,17 @@ packages=(
   "imagemagick"
   "jq"
   "lazygit"
+  "libreoffice-fresh"
   "nautilus"
   "neovim"
+  "okular"
   "qutebrowser"
+  "ristretto"
   "rsync"
+  "tmux"
   "unzip"
   "wget"
   "yazi"
-  "ristretto"
-  "libreoffice-fresh"
-  "okular"
 )
 
 aur_packages=(
@@ -42,7 +43,7 @@ aur_packages=(
   "omarchy-chromium-bin"
   "python-hatchling"
   "selectdefaultapplication-git"
-  "tmux"
+  "smug"
 )
 
 # Must come before installing 1Password
