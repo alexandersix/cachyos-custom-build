@@ -7,7 +7,8 @@
   // "width": 30, // Waybar width
   "spacing": 24, // Gaps between modules (4px)
   // Choose the order of the modules
-  "modules-left": ["ext/workspaces", "dwl/window#layout", "dwl/window#title"],
+  // "modules-left": ["ext/workspaces", "dwl/window#layout", "dwl/window#title"],
+  "modules-left": ["ext/workspaces", "dwl/window#layout"],
   "modules-center": ["clock"],
   "modules-right": [
     // "mpd",
