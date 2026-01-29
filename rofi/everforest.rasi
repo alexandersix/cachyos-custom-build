@@ -2,16 +2,14 @@
 /* EDITED BY Alexander Six (https://github.com/alexandersix) */
 /* Author: Newman Sanchez (https://github.com/newmanls) */
 
-
 * {
-    font:   "Iosevka Medium 13";
+    font:   "Iosevka Regular 13";
 
-    bg0:     #2B3339;
-    bg1:     #323D43;
+    bg0:     #2B3339aa;
+    bg1:     #323D43aa;
     fg0:     #D3C6AA;
 
     accent-color:     #A7C080;
-    // accent-color:     #4f5b58;
     highlight-color:     #414b50;
     urgent-color:     #DBBC7F;
 
@@ -34,7 +32,7 @@ window {
 
 inputbar {
     spacing:    8px;
-    padding:    24px;
+    padding:    20px 24px;
 
     background-color:   @bg1;
 }
@@ -61,7 +59,7 @@ listview {
 }
 
 element {
-    padding:    24px;
+    padding:    12px;
     spacing:    8px;
 }
 
@@ -83,7 +81,7 @@ element alternate active {
 
 element selected {
     text-color: @fg0;
-    border-radius: 50px;
+    border-radius: 12px;
     padding: 24px;
 }
 
@@ -96,8 +94,7 @@ element selected urgent {
 }
 
 element-icon {
-    // size:   0.8em;
-    size:   1.8em;
+    size:   1em;
     padding: 0 24px 0 0;
 }
 
