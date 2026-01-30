@@ -6,8 +6,10 @@ packages=(
   "grim"
   "satty"
   "slurp"
+  "mpv"
   "vlc"
   "vlc-plugin-ffmpeg"
+  "yt-dlp"
 )
 
 aur_packages=(
@@ -22,3 +24,6 @@ paru -Syu --noconfirm "${aur_packages[@]}"
 mkdir $HOME/Pictures
 mkdir $HOME/Videos
 mkdir $HOME/Videos/Screencasts
+
+# TODO: Set up an automated system to bring mpv-youtube-search into the correct places
+# See https://github.com/willswats/mpv-youtube-search?tab=readme-ov-file for details
