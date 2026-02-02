@@ -19,6 +19,7 @@ packages=(
   "qt6-wayland"
   "qt6ct"
   "sassc"
+  "solaar"
   "swww"
   "ttc-iosevka"
   "ttf-font-awesome"
