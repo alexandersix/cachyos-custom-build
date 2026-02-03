@@ -25,6 +25,7 @@ packages=(
   "qutebrowser"
   "ristretto"
   "rsync"
+  "telegram-desktop"
   "tmux"
   "unzip"
   "wget"
@@ -44,6 +45,7 @@ aur_packages=(
   "omarchy-chromium-bin"
   "python-hatchling"
   "selectdefaultapplication-git"
+  "slack-desktop-wayland"
   "smug"
 )
 
