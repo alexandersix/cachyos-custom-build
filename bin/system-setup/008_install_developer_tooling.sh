@@ -53,3 +53,13 @@ git config --global user.name "Alex Six"
 uv tool install harlequin
 uv tool install 'harlequin[postgres]'
 uv tool install 'harlequin[mysql]'
+
+# Spin (Laravel Docker environment)
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/serversideup/spin/main/tools/install.sh)"
+
+# TODO: for spin, we need to install the certificate. The instructions
+# on the website for "Linux" don't actually work with Arch, so instead,
+# I had to do the following:
+# 1. Install `ca-certificate-utils` with pacman (done in an early setup script)
+# 2. `sudo cp /path/to/your/custom.crt /etc/ca-certificates/trust-source/anchors/`
+# 3. `sudo trust extract-compat`

@@ -8,6 +8,7 @@ packages=(
   "bluez"
   "bluez-utils"
   "brightnessctl"
+  "ca-certificate-utils"
   "cliphist"
   "gnome-keyring"
   "gst-plugin-pipewire"
