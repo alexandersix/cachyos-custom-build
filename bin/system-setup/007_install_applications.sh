@@ -38,6 +38,7 @@ aur_packages=(
   "gimp"
   "kdenlive"
   "lazydocker"
+  "localsend"
   "obs-studio"
   "obsidian"
   "omarchy-chromium-bin"
@@ -52,3 +53,8 @@ curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --import
 sudo pacman -Su --needed --noconfirm "${packages[@]}"
 
 paru -Syu --noconfirm "${aur_packages[@]}"
+
+# Open firewall for localsend (pull out into a script later)
+sudo ufw allow 53317/tcp
+sudo ufw allow 53317/udp
+sudo ufw enable # applies changes
