@@ -9,6 +9,7 @@ packages=(
   "gtk3"
   "gtk4"
   "kvantum"
+  "kvantum-qt5"
   "matugen"
   "noto-fonts-emoji"
   "nwg-look"
@@ -17,7 +18,6 @@ packages=(
   "qt6-multimedia-ffmpeg"
   "qt6-svg"
   "qt6-wayland"
-  "qt6ct"
   "sassc"
   "solaar"
   "swww"
@@ -31,7 +31,10 @@ packages=(
   "xdg-desktop-portal-wlr"
 )
 
-aur_packages=("mangowc-git")
+aur_packages=(
+  "mangowc-git",
+  "qt6ct-kde"
+)
 
 sudo pacman -Su --needed --noconfirm "${packages[@]}"
 
