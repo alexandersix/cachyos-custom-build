@@ -230,8 +230,8 @@ EOF
   mv "$tmp" "$target"
 }
 
-if [[ "${QT_QPA_PLATFORMTHEME:-}" != "qt6ct" ]]; then
-  warn "QT_QPA_PLATFORMTHEME is not set to qt6ct; Qt theming may not apply."
+if [[ "${QT_QPA_PLATFORMTHEME:-}" != "qt5ct" && "${QT_QPA_PLATFORMTHEME:-}" != "qt6ct" ]]; then
+  warn "QT_QPA_PLATFORMTHEME is not set to qt5ct (qt6ct also works); Qt theming may not apply."
 fi
 
 qt5ct_available=1
