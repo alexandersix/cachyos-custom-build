@@ -38,7 +38,20 @@ if [[ -z "$THEME_NAME" ]]; then
   exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+resolve_path() {
+  local path="$1"
+
+  if command -v realpath >/dev/null 2>&1; then
+    realpath "$path"
+  elif command -v readlink >/dev/null 2>&1; then
+    readlink -f "$path"
+  else
+    echo "$path"
+  fi
+}
+
+SCRIPT_PATH="$(resolve_path "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 THEME_ROOT="$REPO_ROOT/themes/$THEME_NAME"
 
@@ -58,6 +71,10 @@ QT5CT_COLORS_DIR="$QT5CT_DIR/colors"
 QT6CT_COLORS_DIR="$QT6CT_DIR/colors"
 QT5CT_CONF="$QT5CT_DIR/qt5ct.conf"
 QT6CT_CONF="$QT6CT_DIR/qt6ct.conf"
+
+QUTEBROWSER_CONFIG_DIR="$REPO_ROOT/qutebrowser"
+QUTEBROWSER_THEME_DIR="$QUTEBROWSER_CONFIG_DIR/themes"
+QUTEBROWSER_THEME_TARGET="$QUTEBROWSER_THEME_DIR/current.py"
 
 sync_root_gtk_dirs() {
   local root_config="/root/.config"
@@ -248,5 +265,17 @@ apply_qt() {
   copy_dir_contents "$qt6ct_colors_src" "$QT6CT_COLORS_DIR"
 }
 
+apply_qutebrowser() {
+  local qutebrowser_theme_src="$THEME_ROOT/qutebrowser/everforest.py"
+
+  if [[ -f "$qutebrowser_theme_src" ]]; then
+    mkdir -p "$QUTEBROWSER_THEME_DIR"
+    cp -f "$qutebrowser_theme_src" "$QUTEBROWSER_THEME_TARGET"
+  else
+    warn "missing qutebrowser theme file: $qutebrowser_theme_src"
+  fi
+}
+
 apply_gtk
 apply_qt
+apply_qutebrowser

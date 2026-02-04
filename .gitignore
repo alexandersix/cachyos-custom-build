@@ -1,3 +1,7 @@
 tmux-client*.log
 tmux-server*.log
 tmux/plugins
+qutebrowser/bookmarks
+qutebrowser/greasemonkey
+qutebrowser/quickmarks
+qutebrowser/themes
