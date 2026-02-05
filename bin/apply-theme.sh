@@ -53,7 +53,9 @@ resolve_path() {
 SCRIPT_PATH="$(resolve_path "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-THEME_ROOT="$REPO_ROOT/themes/$THEME_NAME"
+THEME_ROOT="$HOME/.local/share/themes/$THEME_NAME"
+
+echo "$THEME_ROOT"
 
 if [[ ! -d "$THEME_ROOT" ]]; then
   echo "error: theme not found: $THEME_ROOT" >&2
