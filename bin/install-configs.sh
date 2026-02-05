@@ -131,4 +131,11 @@ for folder in "$SOURCE_DIR"/*/; do
 done
 
 echo "------------------------------------------"
+
+echo "Installing default theme..."
+
+apply-theme.sh everforest
+
+echo "------------------------------------------"
+
 echo "Done!"
