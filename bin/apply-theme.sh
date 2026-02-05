@@ -358,9 +358,20 @@ apply_ghostty() {
   fi
 }
 
+apply_rofi() {
+  local theme_file="$THEME_ROOT/rofi/theme.rasi"
+
+  if [[ -f "$theme_file" ]]; then
+    cp -f "$theme_file" "$HOME/.config/rofi"
+  else
+    warn "missing rofi theme"
+  fi
+}
+
 apply_gtk
 apply_qt
 apply_sddm
 apply_qutebrowser
 apply_waybar
 apply_ghostty
+apply_rofi

@@ -4,4 +4,4 @@ configuration {
   display-drun: "run > ";
 }
 
-@theme "everforest"
+@theme "theme"
