@@ -14,22 +14,22 @@ SYNC_ROOT=0
 
 for arg in "$@"; do
   case "$arg" in
-    --sync-root)
-      SYNC_ROOT=1
-      ;;
-    -h|--help)
+  --sync-root)
+    SYNC_ROOT=1
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    if [[ -z "$THEME_NAME" ]]; then
+      THEME_NAME="$arg"
+    else
+      echo "error: unexpected argument: $arg" >&2
       usage
-      exit 0
-      ;;
-    *)
-      if [[ -z "$THEME_NAME" ]]; then
-        THEME_NAME="$arg"
-      else
-        echo "error: unexpected argument: $arg" >&2
-        usage
-        exit 1
-      fi
-      ;;
+      exit 1
+    fi
+    ;;
   esac
 done
 
@@ -117,35 +117,35 @@ read_gtk_settings() {
 
   while IFS= read -r line; do
     case "$line" in
-      ""|\#*|\;*|\[*)
-        continue
-        ;;
+    "" | \#* | \;* | \[*)
+      continue
+      ;;
     esac
 
     key="${line%%=*}"
     value="${line#*=}"
 
     case "$key" in
-      gtk-theme-name)
-        GTK_THEME_NAME="$value"
-        ;;
-      gtk-icon-theme-name)
-        ICON_THEME_NAME="$value"
-        ;;
-      gtk-font-name)
-        FONT_NAME="$value"
-        ;;
-      gtk-cursor-theme-name)
-        CURSOR_THEME_NAME="$value"
-        ;;
-      gtk-cursor-theme-size)
-        CURSOR_SIZE="$value"
-        ;;
-      gtk-application-prefer-dark-theme)
-        PREFER_DARK="$value"
-        ;;
+    gtk-theme-name)
+      GTK_THEME_NAME="$value"
+      ;;
+    gtk-icon-theme-name)
+      ICON_THEME_NAME="$value"
+      ;;
+    gtk-font-name)
+      FONT_NAME="$value"
+      ;;
+    gtk-cursor-theme-name)
+      CURSOR_THEME_NAME="$value"
+      ;;
+    gtk-cursor-theme-size)
+      CURSOR_SIZE="$value"
+      ;;
+    gtk-application-prefer-dark-theme)
+      PREFER_DARK="$value"
+      ;;
     esac
-  done < "$source"
+  done <"$source"
 }
 
 apply_gsettings() {
@@ -291,16 +291,16 @@ apply_sddm() {
 
     while IFS= read -r line; do
       case "$line" in
-        ""|\#*|\;*)
-          continue
-          ;;
-        ConfigFile=*)
-          sddm_config_file="${line#ConfigFile=}"
-          sddm_config_file="${sddm_config_file%%[[:space:]]*}"
-          break
-          ;;
+      "" | \#* | \;*)
+        continue
+        ;;
+      ConfigFile=*)
+        sddm_config_file="${line#ConfigFile=}"
+        sddm_config_file="${sddm_config_file%%[[:space:]]*}"
+        break
+        ;;
       esac
-    done < "$sddm_metadata"
+    done <"$sddm_metadata"
   fi
 
   sddm_config_user="$sddm_theme_dir/${sddm_config_file}.user"
@@ -336,7 +336,19 @@ apply_qutebrowser() {
   fi
 }
 
+apply_waybar() {
+  local theme_file="$THEME_ROOT/waybar/style.css"
+
+  if [[ -f "$theme_file" ]]; then
+    cp -f "$theme_file" "$HOME/.config/waybar"
+    rebar.sh &>/dev/null
+  else
+    warn "missing waybar theme"
+  fi
+}
+
 apply_gtk
 apply_qt
 apply_sddm
 apply_qutebrowser
+apply_waybar
