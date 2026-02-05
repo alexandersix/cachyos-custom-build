@@ -385,6 +385,21 @@ apply_wlogout() {
   fi
 }
 
+apply_tmux() {
+  local theme_file="$THEME_ROOT/tmux/theme.conf"
+
+  if [[ -f "$theme_file" ]]; then
+    cp -f "$theme_file" "$HOME/.config/tmux"
+
+    $HOME/.tmux/plugins/tpm/bin/clean_plugins
+    $HOME/.tmux/plugins/tpm/bin/install_plugins
+
+    tmux list-sessions -F '#{session_name}' | while read session; do tmux source-file $HOME/.config/tmux/tmux.conf; done
+  else
+    warn "missing tmux theme"
+  fi
+}
+
 apply_gtk
 apply_qt
 apply_sddm
@@ -393,3 +408,4 @@ apply_waybar
 apply_ghostty
 apply_rofi
 apply_wlogout
+apply_tmux
