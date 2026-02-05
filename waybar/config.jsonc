@@ -1,25 +1,15 @@
 // -*- mode: jsonc -*-
 {
-  // "layer": "top", // Waybar at top layer
   "position": "top", // Waybar position (top|bottom|left|right)
-  // "height": 30, // Waybar height (to be removed for auto height)
-  // "width": 1280, // Waybar width
-  // "width": 30, // Waybar width
   "spacing": 24, // Gaps between modules (4px)
-  // Choose the order of the modules
-  // "modules-left": ["ext/workspaces", "dwl/window#layout", "dwl/window#title"],
   "modules-left": ["ext/workspaces", "dwl/window#layout"],
   "modules-center": ["clock"],
   "modules-right": [
-    // "mpd",
-    // "idle_inhibitor",
     "pulseaudio",
     "network",
     "power-profiles-daemon",
     "cpu",
     "memory",
-    // "battery",
-    // "battery#bat2",
     "tray",
     "custom/notification",
     "custom/power",
