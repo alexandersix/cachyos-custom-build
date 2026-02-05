@@ -368,6 +368,23 @@ apply_rofi() {
   fi
 }
 
+apply_wlogout() {
+  local theme_file="$THEME_ROOT/wlogout/style.css"
+  local icons_directory="$THEME_ROOT/wlogout/icons"
+
+  if [[ -f "$theme_file" ]]; then
+    cp -f "$theme_file" "$HOME/.config/wlogout"
+  else
+    warn "missing wlogout theme"
+  fi
+
+  if [[ -d "$icons_directory" ]]; then
+    cp -rf "$icons_directory" "$HOME/.config/wlogout"
+  else
+    warn "missing wlogout icons"
+  fi
+}
+
 apply_gtk
 apply_qt
 apply_sddm
@@ -375,3 +392,4 @@ apply_qutebrowser
 apply_waybar
 apply_ghostty
 apply_rofi
+apply_wlogout
