@@ -20,20 +20,43 @@ for folder in "$SOURCE_DIR"/*/; do
 
   # --- SPECIAL CASE: SDDM ---
   if [ "$folder_name" == "sddm" ]; then
-    sddm_source="$folder/sddm.conf"
-    sddm_target="/etc/sddm.conf"
+    themes_source="$folder/sddm.conf"
+    themes_target="/etc/sddm.conf"
 
-    if [ -f "$sddm_source" ]; then
+    if [ -f "$themes_source" ]; then
       echo "🛡️  Handling SDDM configuration (requires sudo):"
-      if [ -L "$sddm_target" ] && [ ! -e "$sddm_target" ]; then
-        sudo rm "$sddm_target"
-        sudo ln -s "$sddm_source" "$sddm_target"
+      if [ -L "$themes_target" ] && [ ! -e "$themes_target" ]; then
+        sudo rm "$themes_target"
+        sudo ln -s "$themes_source" "$themes_target"
         echo "   🔧 Fixed broken SDDM symlink."
-      elif [ -e "$sddm_target" ]; then
+      elif [ -e "$themes_target" ]; then
         echo "   ✅ SDDM config already exists (Skipping)."
       else
-        sudo ln -s "$sddm_source" "$sddm_target"
+        sudo ln -s "$themes_source" "$themes_target"
         echo "   🚀 Created SDDM symlink to /etc/sddm.conf."
+      fi
+    fi
+    continue # Skip the default .config logic for this folder
+  fi
+
+  # --- SPECIAL CASE: themes ---
+  if [ "$folder_name" == "themes" ]; then
+    echo "WE ARE IN THEMES"
+    themes_source="$folder/"
+    themes_target="$HOME/.local/share/themes"
+
+    if [ -d "$themes_source" ]; then
+      echo "WE ARE IN FIRST CONDITIONAL"
+      echo "🛡️  Handling themes directory:"
+      if [ -L "$themes_target" ] && [ ! -e "$themes_target" ]; then
+        rm "$themes_target"
+        ln -s "$themes_source" "$themes_target"
+        echo "   🔧 Fixed broken themes symlink."
+      elif [ -e "$themes_target" ]; then
+        echo "   ✅ themes directory already exists (Skipping)."
+      else
+        ln -s "$themes_source" "$themes_target"
+        echo "   🚀 Created themes symlink to /$HOME/.local/share/themes."
       fi
     fi
     continue # Skip the default .config logic for this folder
