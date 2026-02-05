@@ -21,11 +21,6 @@ This guide documents how to create and apply GTK/Qt themes in this repo, includi
 - `~/.config/gtk-3.0/settings.ini`
 - `~/.config/gtk-4.0/settings.ini`
 
-### Session environment (required for Qt theming)
-- `./.pam_environment` (symlinked to `~/.pam_environment` by `bin/symlink.sh`)
-  - Uses PAM syntax: `VAR DEFAULT=value`
-  - Ensures `QT_QPA_PLATFORMTHEME=qt6ct` and `QT_QUICK_CONTROLS_STYLE=Fusion` are set at login
-
 ### Tmux environment (so Qt vars exist inside tmux)
 - `tmux/tmux.conf`
   - `update-environment` includes Qt/Wayland vars so tmux pulls them in on attach
@@ -89,8 +84,6 @@ systemctl --user restart swaync.service
 - Qt palettes must live under:
   - `~/.config/qt6ct/colors/`
   - `~/.config/qt5ct/colors/`
-- Ensure `QT_QPA_PLATFORMTHEME=qt6ct` is set at login:
-  - `./.pam_environment` → `~/.pam_environment`
 - If Qt looks correct outside tmux but not inside:
   - Confirm `tmux/tmux.conf` includes the Qt vars in `update-environment`.
 - GTK4/libadwaita theming relies on the GTK4 symlink step in the script.
