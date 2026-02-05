@@ -60,3 +60,6 @@ paru -Syu --noconfirm "${aur_packages[@]}"
 sudo ufw allow 53317/tcp
 sudo ufw allow 53317/udp
 sudo ufw enable # applies changes
+
+# Install web apps
+install-web-app.sh "Twitter" "https://twitter.com" "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/twitter.png"
