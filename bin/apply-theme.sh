@@ -265,6 +265,66 @@ apply_qt() {
   copy_dir_contents "$qt6ct_colors_src" "$QT6CT_COLORS_DIR"
 }
 
+apply_sddm() {
+  local sddm_theme_name="silent"
+  local sddm_theme_dir="/usr/share/sddm/themes/$sddm_theme_name"
+  local sddm_metadata="$sddm_theme_dir/metadata.desktop"
+  local sddm_override_src="$THEME_ROOT/sddm/$sddm_theme_name/configs/background.conf.user"
+  local sddm_wallpaper_src="$HOME/wallpapers/everforest/polyscape_2.png"
+  local sddm_wallpaper_name="polyscape_2.png"
+  local sddm_wallpaper_dest="$sddm_theme_dir/backgrounds/$sddm_wallpaper_name"
+  local sddm_config_file="theme.conf"
+  local sddm_config_user=""
+
+  if [[ ! -d "$sddm_theme_dir" ]]; then
+    warn "SDDM theme not found: $sddm_theme_dir"
+    return
+  fi
+
+  if [[ ! -f "$sddm_override_src" ]]; then
+    warn "missing SDDM override file: $sddm_override_src"
+    return
+  fi
+
+  if [[ -f "$sddm_metadata" ]]; then
+    local line
+
+    while IFS= read -r line; do
+      case "$line" in
+        ""|\#*|\;*)
+          continue
+          ;;
+        ConfigFile=*)
+          sddm_config_file="${line#ConfigFile=}"
+          sddm_config_file="${sddm_config_file%%[[:space:]]*}"
+          break
+          ;;
+      esac
+    done < "$sddm_metadata"
+  fi
+
+  sddm_config_user="$sddm_theme_dir/${sddm_config_file}.user"
+
+  if [[ ! -f "$sddm_wallpaper_src" ]]; then
+    warn "missing SDDM wallpaper source: $sddm_wallpaper_src"
+    return
+  fi
+
+  if [[ "${EUID}" -ne 0 ]]; then
+    if command -v sudo >/dev/null 2>&1; then
+      sudo mkdir -p "$(dirname "$sddm_config_user")" "$sddm_theme_dir/backgrounds"
+      sudo cp -f "$sddm_override_src" "$sddm_config_user"
+      sudo cp -f "$sddm_wallpaper_src" "$sddm_wallpaper_dest"
+    else
+      warn "sudo not found; skipping SDDM updates."
+    fi
+  else
+    mkdir -p "$(dirname "$sddm_config_user")" "$sddm_theme_dir/backgrounds"
+    cp -f "$sddm_override_src" "$sddm_config_user"
+    cp -f "$sddm_wallpaper_src" "$sddm_wallpaper_dest"
+  fi
+}
+
 apply_qutebrowser() {
   local qutebrowser_theme_src="$THEME_ROOT/qutebrowser/everforest.py"
 
@@ -278,4 +338,5 @@ apply_qutebrowser() {
 
 apply_gtk
 apply_qt
+apply_sddm
 apply_qutebrowser
