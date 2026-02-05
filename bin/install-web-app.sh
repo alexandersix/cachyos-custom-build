@@ -2,19 +2,24 @@
 
 set -euo pipefail
 
-# Get user input
+if [[ -z "$1" || -z "$2" || -z "$3" ]]; then
+  # Prompt for user input
+  echo "Enter app name: "
 
-echo "Enter app name: "
+  read APP_NAME
 
-read APP_NAME
+  echo "Enter app url: "
 
-echo "Enter app url: "
+  read APP_URL
 
-read APP_URL
+  echo "Enter icon url (must be png): "
 
-echo "Enter icon url (must be png): "
-
-read ICON_URL
+  read ICON_URL
+else
+  APP_NAME="$1"
+  APP_URL="$2"
+  ICON_URL="$3"
+fi
 
 # Validate
 
@@ -23,7 +28,7 @@ if [[ -z "$APP_NAME" || -z "$APP_URL" || -z "$ICON_URL" ]]; then
   exit 1
 fi
 
-if ! [ -d "$HOME/.local/share/applications/icons"]; then
+if ! [[ -d "$HOME/.local/share/applications/icons" ]]; then
   mkdir -p "$HOME/.local/share/applications/icons"
 fi
 
