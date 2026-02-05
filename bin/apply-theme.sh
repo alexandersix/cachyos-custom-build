@@ -347,8 +347,20 @@ apply_waybar() {
   fi
 }
 
+apply_ghostty() {
+  local theme_file="$THEME_ROOT/ghostty/theme"
+
+  if [[ -f "$theme_file" ]]; then
+    cp -f "$theme_file" "$HOME/.config/ghostty"
+    pkill -USR2 ghostty
+  else
+    warn "missing ghostty theme"
+  fi
+}
+
 apply_gtk
 apply_qt
 apply_sddm
 apply_qutebrowser
 apply_waybar
+apply_ghostty

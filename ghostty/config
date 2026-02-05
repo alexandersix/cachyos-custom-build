@@ -1,6 +1,6 @@
-confirm-close-surface = false
+config-file = theme
 
-theme = Everforest Dark Hard
+confirm-close-surface = false
 
 font-family="Iosevka"
 font-size=14
