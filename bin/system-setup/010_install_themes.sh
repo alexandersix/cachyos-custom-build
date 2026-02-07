@@ -8,6 +8,7 @@ packages=(
 
 aur_packages=(
   everforest-gtk-theme-git
+  kanagawa-gtk-theme-git
 )
 
 sudo pacman -Su --needed --noconfirm "${packages[@]}"

@@ -50,10 +50,47 @@ resolve_path() {
   fi
 }
 
+resolve_user_home() {
+  local user="$1"
+  local home=""
+
+  if [[ -n "$user" ]] && command -v getent >/dev/null 2>&1; then
+    home="$(getent passwd "$user" | cut -d: -f6)"
+  fi
+
+  if [[ -z "$home" && -n "$user" ]]; then
+    home="$(eval echo "~$user")"
+  fi
+
+  if [[ -z "$home" ]]; then
+    home="${HOME:-}"
+  fi
+
+  echo "$home"
+}
+
 SCRIPT_PATH="$(resolve_path "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-THEME_ROOT="$HOME/.local/share/themes/$THEME_NAME"
+
+TARGET_USER="${SUDO_USER:-${USER:-}}"
+USER_HOME="${HOME:-}"
+if [[ -z "$USER_HOME" && -n "$TARGET_USER" ]]; then
+  USER_HOME="$(resolve_user_home "$TARGET_USER")"
+fi
+
+if [[ "${EUID}" -eq 0 && -n "${SUDO_USER:-}" ]]; then
+  USER_HOME="$(resolve_user_home "$SUDO_USER")"
+fi
+
+if [[ -z "$USER_HOME" ]]; then
+  echo "error: unable to resolve user home directory" >&2
+  exit 1
+fi
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-$USER_HOME/.config}"
+DATA_HOME="${XDG_DATA_HOME:-$USER_HOME/.local/share}"
+THEME_ROOT="$DATA_HOME/themes/$THEME_NAME"
 
 echo "$THEME_ROOT"
 
@@ -62,19 +99,19 @@ if [[ ! -d "$THEME_ROOT" ]]; then
   exit 1
 fi
 
-GTK_SETTINGS_DIR_3="$HOME/.config/gtk-3.0"
-GTK_SETTINGS_DIR_4="$HOME/.config/gtk-4.0"
+GTK_SETTINGS_DIR_3="$CONFIG_HOME/gtk-3.0"
+GTK_SETTINGS_DIR_4="$CONFIG_HOME/gtk-4.0"
 GTK_SETTINGS_3="$GTK_SETTINGS_DIR_3/settings.ini"
 GTK_SETTINGS_4="$GTK_SETTINGS_DIR_4/settings.ini"
 
-QT5CT_DIR="$HOME/.config/qt5ct"
-QT6CT_DIR="$HOME/.config/qt6ct"
+QT5CT_DIR="$CONFIG_HOME/qt5ct"
+QT6CT_DIR="$CONFIG_HOME/qt6ct"
 QT5CT_COLORS_DIR="$QT5CT_DIR/colors"
 QT6CT_COLORS_DIR="$QT6CT_DIR/colors"
 QT5CT_CONF="$QT5CT_DIR/qt5ct.conf"
 QT6CT_CONF="$QT6CT_DIR/qt6ct.conf"
 
-QUTEBROWSER_CONFIG_DIR="$REPO_ROOT/qutebrowser"
+QUTEBROWSER_CONFIG_DIR="$CONFIG_HOME/qutebrowser"
 QUTEBROWSER_THEME_DIR="$QUTEBROWSER_CONFIG_DIR/themes"
 QUTEBROWSER_THEME_TARGET="$QUTEBROWSER_THEME_DIR/current.py"
 
@@ -188,6 +225,42 @@ apply_gsettings() {
   fi
 }
 
+link_gtk4_assets() {
+  local theme_roots=(
+    "$USER_HOME/.themes"
+    "$DATA_HOME/themes"
+    "/usr/share/themes"
+  )
+  local theme_dir=""
+  local root
+  local candidate
+
+  if [[ -z "$GTK_THEME_NAME" ]]; then
+    warn "GTK theme name missing; skipping GTK4 asset links."
+    return
+  fi
+
+  for root in "${theme_roots[@]}"; do
+    candidate="$root/$GTK_THEME_NAME"
+    if [[ -d "$candidate/gtk-4.0" ]]; then
+      theme_dir="$candidate"
+      break
+    fi
+  done
+
+  if [[ -z "$theme_dir" ]]; then
+    warn "GTK4 theme assets not found for $GTK_THEME_NAME; skipping GTK4 links."
+    return
+  fi
+
+  mkdir -p "$GTK_SETTINGS_DIR_4"
+  if compgen -G "$theme_dir/gtk-4.0/*" >/dev/null; then
+    ln -nfs "$theme_dir/gtk-4.0/"* "$GTK_SETTINGS_DIR_4/"
+  else
+    warn "No GTK4 assets found in $theme_dir/gtk-4.0."
+  fi
+}
+
 apply_gtk() {
   local theme_settings_3="$THEME_ROOT/gtk/gtk-3.0/settings.ini"
   local theme_settings_4="$THEME_ROOT/gtk/gtk-4.0/settings.ini"
@@ -211,7 +284,9 @@ apply_gtk() {
   fi
 
   read_gtk_settings "$theme_settings_3"
+  link_gtk4_assets
   apply_gsettings
+  echo "note: GTK4 apps (e.g., Nautilus) may require a full restart: killall nautilus"
 }
 
 copy_dir_contents() {
@@ -267,16 +342,31 @@ apply_qt() {
   copy_dir_contents "$qt6ct_colors_src" "$QT6CT_COLORS_DIR"
 }
 
+apply_wallpaper() {
+  local wallpaper_dir="$THEME_ROOT/wallpapers"
+
+  if [[ -d "$wallpaper_dir" ]]; then
+    if ! "$SCRIPT_DIR/wallpaper.sh" "$wallpaper_dir"; then
+      warn "failed to apply wallpaper from: $wallpaper_dir"
+    fi
+  else
+    warn "missing wallpapers directory: $wallpaper_dir"
+  fi
+}
+
 apply_sddm() {
   local sddm_theme_name="silent"
   local sddm_theme_dir="/usr/share/sddm/themes/$sddm_theme_name"
   local sddm_metadata="$sddm_theme_dir/metadata.desktop"
   local sddm_override_src="$THEME_ROOT/sddm/$sddm_theme_name/configs/background.conf.user"
-  local sddm_wallpaper_src="$HOME/wallpapers/everforest/polyscape_2.png"
-  local sddm_wallpaper_name="polyscape_2.png"
-  local sddm_wallpaper_dest="$sddm_theme_dir/backgrounds/$sddm_wallpaper_name"
+  local sddm_wallpaper_src=""
+  local sddm_wallpaper_name=""
+  local sddm_wallpaper_dest=""
   local sddm_config_file="theme.conf"
   local sddm_config_user=""
+  local wallpaper_dir="$THEME_ROOT/wallpapers"
+  local wallpaper_candidates=()
+  local tmp_override=""
 
   if [[ ! -d "$sddm_theme_dir" ]]; then
     warn "SDDM theme not found: $sddm_theme_dir"
@@ -307,31 +397,74 @@ apply_sddm() {
 
   sddm_config_user="$sddm_theme_dir/${sddm_config_file}.user"
 
-  if [[ ! -f "$sddm_wallpaper_src" ]]; then
-    warn "missing SDDM wallpaper source: $sddm_wallpaper_src"
+  if [[ ! -d "$wallpaper_dir" ]]; then
+    warn "missing wallpapers directory: $wallpaper_dir"
     return
   fi
 
+  local shopt_state
+  shopt_state="$(shopt -p nullglob nocaseglob)"
+  shopt -s nullglob nocaseglob
+  wallpaper_candidates=("$wallpaper_dir"/*.{png,jpg,jpeg,webp,gif,bmp})
+  eval "$shopt_state"
+
+  if [[ ${#wallpaper_candidates[@]} -eq 0 ]]; then
+    warn "no wallpapers found in: $wallpaper_dir"
+    return
+  fi
+
+  IFS= read -r sddm_wallpaper_src < <(printf '%s\n' "${wallpaper_candidates[@]}" | LC_ALL=C sort)
+
+  if [[ -z "$sddm_wallpaper_src" ]]; then
+    warn "failed to select SDDM wallpaper from: $wallpaper_dir"
+    return
+  fi
+
+  sddm_wallpaper_name="$(basename "$sddm_wallpaper_src")"
+  sddm_wallpaper_dest="$sddm_theme_dir/backgrounds/$sddm_wallpaper_name"
+
+  tmp_override="$(mktemp)"
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^([[:space:]]*)background[[:space:]]*= ]]; then
+      printf '%sbackground = "%s"\n' "${BASH_REMATCH[1]}" "$sddm_wallpaper_name" >>"$tmp_override"
+    else
+      printf '%s\n' "$line" >>"$tmp_override"
+    fi
+  done <"$sddm_override_src"
+
   if [[ "${EUID}" -ne 0 ]]; then
     if command -v sudo >/dev/null 2>&1; then
-      sudo mkdir -p "$(dirname "$sddm_config_user")" "$sddm_theme_dir/backgrounds"
-      sudo cp -f "$sddm_override_src" "$sddm_config_user"
-      sudo cp -f "$sddm_wallpaper_src" "$sddm_wallpaper_dest"
+      if ! sudo mkdir -p "$(dirname "$sddm_config_user")" "$sddm_theme_dir/backgrounds"; then
+        warn "failed to create SDDM config directories"
+        return
+      fi
+      if ! sudo cp -f "$tmp_override" "$sddm_config_user"; then
+        warn "failed to write SDDM override config"
+        return
+      fi
+      if ! sudo cp -f "$sddm_wallpaper_src" "$sddm_wallpaper_dest"; then
+        warn "failed to copy SDDM wallpaper"
+        return
+      fi
     else
       warn "sudo not found; skipping SDDM updates."
     fi
   else
     mkdir -p "$(dirname "$sddm_config_user")" "$sddm_theme_dir/backgrounds"
-    cp -f "$sddm_override_src" "$sddm_config_user"
+    cp -f "$tmp_override" "$sddm_config_user"
     cp -f "$sddm_wallpaper_src" "$sddm_wallpaper_dest"
   fi
+
+  rm -f "$tmp_override"
 }
 
 apply_qutebrowser() {
-  local qutebrowser_theme_src="$THEME_ROOT/qutebrowser/everforest.py"
+  local qutebrowser_theme_dir="$THEME_ROOT/qutebrowser"
+  local qutebrowser_theme_src="$qutebrowser_theme_dir/current.py"
+
+  mkdir -p "$QUTEBROWSER_THEME_DIR"
 
   if [[ -f "$qutebrowser_theme_src" ]]; then
-    mkdir -p "$QUTEBROWSER_THEME_DIR"
     cp -f "$qutebrowser_theme_src" "$QUTEBROWSER_THEME_TARGET"
   else
     warn "missing qutebrowser theme file: $qutebrowser_theme_src"
@@ -342,7 +475,7 @@ apply_waybar() {
   local theme_file="$THEME_ROOT/waybar/style.css"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$HOME/.config/waybar"
+    cp -f "$theme_file" "$CONFIG_HOME/waybar"
     rebar.sh &>/dev/null
   else
     warn "missing waybar theme"
@@ -353,7 +486,7 @@ apply_ghostty() {
   local theme_file="$THEME_ROOT/ghostty/theme"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$HOME/.config/ghostty"
+    cp -f "$theme_file" "$CONFIG_HOME/ghostty"
     pkill -USR2 ghostty
   else
     warn "missing ghostty theme"
@@ -364,7 +497,7 @@ apply_rofi() {
   local theme_file="$THEME_ROOT/rofi/theme.rasi"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$HOME/.config/rofi"
+    cp -f "$theme_file" "$CONFIG_HOME/rofi"
   else
     warn "missing rofi theme"
   fi
@@ -375,13 +508,13 @@ apply_wlogout() {
   local icons_directory="$THEME_ROOT/wlogout/icons"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$HOME/.config/wlogout"
+    cp -f "$theme_file" "$CONFIG_HOME/wlogout"
   else
     warn "missing wlogout theme"
   fi
 
   if [[ -d "$icons_directory" ]]; then
-    cp -rf "$icons_directory" "$HOME/.config/wlogout"
+    cp -rf "$icons_directory" "$CONFIG_HOME/wlogout"
   else
     warn "missing wlogout icons"
   fi
@@ -391,23 +524,24 @@ apply_tmux() {
   local theme_file="$THEME_ROOT/tmux/theme.conf"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$HOME/.config/tmux"
+    cp -f "$theme_file" "$CONFIG_HOME/tmux"
 
-    $HOME/.tmux/plugins/tpm/bin/clean_plugins
-    $HOME/.tmux/plugins/tpm/bin/install_plugins
+    $USER_HOME/.tmux/plugins/tpm/bin/clean_plugins
+    $USER_HOME/.tmux/plugins/tpm/bin/install_plugins
 
-    tmux list-sessions -F '#{session_name}' | while read session; do tmux source-file $HOME/.config/tmux/tmux.conf; done
+    tmux list-sessions -F '#{session_name}' | while read session; do tmux source-file $CONFIG_HOME/tmux/tmux.conf; done
   else
     warn "missing tmux theme"
   fi
 }
 
+apply_qutebrowser
 apply_gtk
 apply_qt
-apply_sddm
-apply_qutebrowser
+apply_wallpaper
 apply_waybar
 apply_ghostty
 apply_rofi
 apply_wlogout
 apply_tmux
+apply_sddm
