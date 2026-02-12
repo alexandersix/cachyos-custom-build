@@ -99,6 +99,8 @@ if [[ ! -d "$THEME_ROOT" ]]; then
   exit 1
 fi
 
+echo "$THEME_NAME" >$HOME/.local/share/current-theme
+
 GTK_SETTINGS_DIR_3="$CONFIG_HOME/gtk-3.0"
 GTK_SETTINGS_DIR_4="$CONFIG_HOME/gtk-4.0"
 GTK_SETTINGS_3="$GTK_SETTINGS_DIR_3/settings.ini"
