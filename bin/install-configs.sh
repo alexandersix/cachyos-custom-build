@@ -4,12 +4,34 @@ set -euo pipefail
 shopt -s nullglob
 
 usage() {
-  echo "Usage: $0 /path/to/source_configs"
+  echo "Usage: $0 <source-dir> [package ...] [--all] [--list]"
+  echo
+  echo "Install config packages from <source-dir>."
+  echo
+  echo "Arguments:"
+  echo "  <source-dir>    Required source directory"
+  echo "  package         Optional package name to install"
+  echo
+  echo "Options:"
+  echo "  --all           Install all available packages"
+  echo "  --list          List available packages and exit"
+  echo "  -h, --help      Show this help message"
+  echo
+  echo "Behavior:"
+  echo "  - If package names are provided, only those packages are installed."
+  echo "  - If --all is provided, all packages are installed."
+  echo "  - If --list is provided, packages are listed and no install is performed."
+  echo "  - If neither package names nor --all are provided, nothing is installed."
 }
 
 if [[ $# -lt 1 ]]; then
   usage
   exit 1
+fi
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  usage
+  exit 0
 fi
 
 if [[ ! -d "$1" ]]; then
@@ -18,9 +40,56 @@ if [[ ! -d "$1" ]]; then
 fi
 
 SOURCE_DIR=$(realpath "$1")
+shift
+
+INSTALL_ALL=0
+LIST_ONLY=0
+REQUESTED_PACKAGES=()
+
+for arg in "$@"; do
+  case "$arg" in
+    --all)
+      INSTALL_ALL=1
+      ;;
+    --list)
+      LIST_ONLY=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "Unknown option: $arg"
+      usage
+      exit 1
+      ;;
+    *)
+      REQUESTED_PACKAGES+=("$arg")
+      ;;
+  esac
+done
+
+if [[ ${#REQUESTED_PACKAGES[@]} -gt 0 ]]; then
+  declare -A requested_seen=()
+  unique_requested_packages=()
+
+  for package in "${REQUESTED_PACKAGES[@]}"; do
+    if [[ -z "${requested_seen[$package]+x}" ]]; then
+      unique_requested_packages+=("$package")
+      requested_seen["$package"]=1
+    fi
+  done
+
+  REQUESTED_PACKAGES=("${unique_requested_packages[@]}")
+fi
 
 TARGET_DIR="$HOME/.config"
 mkdir -p "$TARGET_DIR"
+
+join_by_comma() {
+  local IFS=", "
+  echo "$*"
+}
 
 run() {
   local use_sudo="$1"
@@ -97,16 +166,13 @@ install_file() {
   run "$use_sudo" cp -f "$source" "$target"
 }
 
-echo "Installing configs from: $SOURCE_DIR"
-echo "------------------------------------------"
+install_package() {
+  local package_name="$1"
+  local folder="$SOURCE_DIR/$package_name"
 
-for folder in "$SOURCE_DIR"/*/; do
-  folder="${folder%/}"
-  folder_name=$(basename "$folder")
-
-  if [[ "$folder_name" == "sddm" ]]; then
-    sddm_source="$folder/sddm.conf"
-    sddm_target="/etc/sddm.conf"
+  if [[ "$package_name" == "sddm" ]]; then
+    local sddm_source="$folder/sddm.conf"
+    local sddm_target="/etc/sddm.conf"
 
     if [[ -f "$sddm_source" ]]; then
       echo "Installing sddm.conf -> $sddm_target"
@@ -114,28 +180,97 @@ for folder in "$SOURCE_DIR"/*/; do
     else
       echo "Skipping SDDM (missing $sddm_source)"
     fi
-    continue
+    return 0
   fi
 
-  if [[ "$folder_name" == "themes" ]]; then
-    themes_target="$HOME/.local/share/themes"
+  if [[ "$package_name" == "themes" ]]; then
+    local themes_target="$HOME/.local/share/themes"
     echo "Installing themes -> $themes_target"
     mkdir -p "$HOME/.local/share"
     install_dir "$folder" "$themes_target" "false"
-    continue
+    return 0
   fi
 
-  target_path="$TARGET_DIR/$folder_name"
-  echo "Installing $folder_name -> $target_path"
+  local target_path="$TARGET_DIR/$package_name"
+  echo "Installing $package_name -> $target_path"
   install_dir "$folder" "$target_path" "false"
+}
+
+AVAILABLE_PACKAGES=()
+declare -A available_lookup=()
+
+for folder in "$SOURCE_DIR"/*/; do
+  folder="${folder%/}"
+  folder_name=$(basename "$folder")
+
+  AVAILABLE_PACKAGES+=("$folder_name")
+  available_lookup["$folder_name"]=1
+done
+
+INSTALL_PACKAGES=()
+
+if [[ "$LIST_ONLY" -eq 1 ]]; then
+  if [[ "$INSTALL_ALL" -eq 1 || ${#REQUESTED_PACKAGES[@]} -gt 0 ]]; then
+    echo "Ignoring install arguments because --list was provided"
+  fi
+
+  for package in "${AVAILABLE_PACKAGES[@]}"; do
+    echo "$package"
+  done
+  exit 0
+fi
+
+if [[ "$INSTALL_ALL" -eq 1 ]]; then
+  INSTALL_PACKAGES=("${AVAILABLE_PACKAGES[@]}")
+elif [[ ${#REQUESTED_PACKAGES[@]} -gt 0 ]]; then
+  UNKNOWN_PACKAGES=()
+
+  for package in "${REQUESTED_PACKAGES[@]}"; do
+    if [[ -z "${available_lookup[$package]+x}" ]]; then
+      UNKNOWN_PACKAGES+=("$package")
+    fi
+  done
+
+  if [[ ${#UNKNOWN_PACKAGES[@]} -gt 0 ]]; then
+    echo "Unknown package name(s): $(join_by_comma "${UNKNOWN_PACKAGES[@]}")"
+    if [[ ${#AVAILABLE_PACKAGES[@]} -gt 0 ]]; then
+      echo "Valid packages: $(join_by_comma "${AVAILABLE_PACKAGES[@]}")"
+    else
+      echo "Valid packages: (none found in source directory)"
+    fi
+    exit 1
+  fi
+
+  INSTALL_PACKAGES=("${REQUESTED_PACKAGES[@]}")
+fi
+
+echo "Installing configs from: $SOURCE_DIR"
+echo "------------------------------------------"
+
+if [[ "$INSTALL_ALL" -eq 1 ]]; then
+  echo "Installing all packages"
+  if [[ ${#REQUESTED_PACKAGES[@]} -gt 0 ]]; then
+    echo "Ignoring explicit package list because --all was provided: $(join_by_comma "${REQUESTED_PACKAGES[@]}")"
+  fi
+elif [[ ${#INSTALL_PACKAGES[@]} -gt 0 ]]; then
+  echo "Installing selected packages: $(join_by_comma "${INSTALL_PACKAGES[@]}")"
+else
+  echo "No packages selected; nothing to install"
+  exit 0
+fi
+
+echo "------------------------------------------"
+
+for package in "${INSTALL_PACKAGES[@]}"; do
+  install_package "$package"
 done
 
 echo "------------------------------------------"
 
-echo "Installing default theme..."
-
-apply-theme.sh everforest
-
-echo "------------------------------------------"
+if [[ "$INSTALL_ALL" -eq 1 ]]; then
+  echo "Installing default theme..."
+  apply-theme.sh everforest
+  echo "------------------------------------------"
+fi
 
 echo "Done!"
