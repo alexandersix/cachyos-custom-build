@@ -39,4 +39,4 @@ if [[ -z "$selected" ]]; then
   exit 1
 fi
 
-swww img -t random --transition-fps 60 "$selected"
+swww img -t any --transition-fps 60 "$selected"
