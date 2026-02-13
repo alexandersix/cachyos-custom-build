@@ -6,11 +6,10 @@ usage() {
 }
 
 if [[ "$#" -ne 1 ]]; then
-  usage
-  exit 1
+  wallpaper_dir="$HOME/.local/share/themes/$(cat $HOME/.local/share/current-theme)/wallpapers"
+else
+  wallpaper_dir="$1"
 fi
-
-wallpaper_dir="$1"
 
 if [[ ! -d "$wallpaper_dir" ]]; then
   echo "error: wallpaper directory not found: $wallpaper_dir" >&2
