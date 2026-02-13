@@ -2,19 +2,19 @@
 
 set -euo pipefail
 
-if [[ -z "$1" || -z "$2" || -z "$3" ]]; then
+if [[ "$#" -lt 3 ]]; then
   # Prompt for user input
   echo "Enter app name: "
 
-  read APP_NAME
+  read -r APP_NAME
 
   echo "Enter app url: "
 
-  read APP_URL
+  read -r APP_URL
 
   echo "Enter icon url (must be png): "
 
-  read ICON_URL
+  read -r ICON_URL
 else
   APP_NAME="$1"
   APP_URL="$2"
