@@ -1,0 +1,80 @@
+@theme "theme"
+
+configuration {
+    show-icons: true;
+}
+
+window {
+    fullscreen: false;
+    width: 100%;
+    transparency: "real";
+    cursor: "default";
+    spacing: 0px;
+    padding: 0px;
+    border: 0px;
+    border-radius: 0px;
+    border-color: transparent;
+    background-color: transparent;
+}
+
+mainbox {
+    children: [ "listview" ];
+    background-color: @bg0;
+}
+
+listview {
+    columns: 6;
+    lines: 1;
+    spacing: 40px;
+    padding: 20px 30px;
+    cycle: true;
+    dynamic: false;
+    scrollbar: false;
+    layout: vertical;
+    reverse: true;
+    fixed-height: true;
+    fixed-columns: true;
+    cursor: "default";
+    background-color: transparent;
+    text-color: @fg0;
+}
+
+element {
+    orientation: vertical;
+    spacing: 8px;
+    padding: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: transparent;
+    text-color: @fg0;
+}
+
+element selected {
+    padding: 8px;
+    border-radius: 12px;
+    text-color: @fg0;
+}
+
+element selected.normal,
+element selected.active {
+    background-color: @highlight-color;
+    text-color: @fg0;
+}
+
+element-icon {
+    size: 14em;
+    padding: 0px;
+    cursor: inherit;
+    border-radius: 8px;
+    background-color: transparent;
+    text-color: inherit;
+}
+
+element-text {
+    vertical-align: 0.5;
+    horizontal-align: 0.5;
+    padding: 6px 8px 10px 8px;
+    cursor: inherit;
+    background-color: transparent;
+    text-color: inherit;
+}
