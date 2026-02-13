@@ -48,24 +48,24 @@ REQUESTED_PACKAGES=()
 
 for arg in "$@"; do
   case "$arg" in
-    --all)
-      INSTALL_ALL=1
-      ;;
-    --list)
-      LIST_ONLY=1
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    -*)
-      echo "Unknown option: $arg"
-      usage
-      exit 1
-      ;;
-    *)
-      REQUESTED_PACKAGES+=("$arg")
-      ;;
+  --all)
+    INSTALL_ALL=1
+    ;;
+  --list)
+    LIST_ONLY=1
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  -*)
+    echo "Unknown option: $arg"
+    usage
+    exit 1
+    ;;
+  *)
+    REQUESTED_PACKAGES+=("$arg")
+    ;;
   esac
 done
 
