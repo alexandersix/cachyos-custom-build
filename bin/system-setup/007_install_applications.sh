@@ -47,6 +47,7 @@ aur_packages=(
   "selectdefaultapplication-git"
   "slack-desktop-wayland"
   "smug"
+  "zed-git"
 )
 
 # Must come before installing 1Password
