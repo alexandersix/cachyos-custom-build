@@ -9,6 +9,19 @@ warn() {
   echo "warn: $*"
 }
 
+step() {
+  echo "==> $*"
+}
+
+run_step() {
+  local label="$1"
+  local fn="$2"
+
+  step "Applying $label"
+  "$fn"
+  step "Applied $label"
+}
+
 THEME_NAME=""
 SYNC_ROOT=0
 
@@ -92,14 +105,15 @@ CONFIG_HOME="${XDG_CONFIG_HOME:-$USER_HOME/.config}"
 DATA_HOME="${XDG_DATA_HOME:-$USER_HOME/.local/share}"
 THEME_ROOT="$DATA_HOME/themes/$THEME_NAME"
 
-echo "$THEME_ROOT"
+CURRENT_THEME_FILE="$DATA_HOME/current-theme"
 
 if [[ ! -d "$THEME_ROOT" ]]; then
   echo "error: theme not found: $THEME_ROOT" >&2
   exit 1
 fi
 
-echo "$THEME_NAME" >$HOME/.local/share/current-theme
+mkdir -p "$DATA_HOME"
+printf '%s\n' "$THEME_NAME" >"$CURRENT_THEME_FILE"
 
 GTK_SETTINGS_DIR_3="$CONFIG_HOME/gtk-3.0"
 GTK_SETTINGS_DIR_4="$CONFIG_HOME/gtk-4.0"
@@ -475,10 +489,20 @@ apply_qutebrowser() {
 
 apply_waybar() {
   local theme_file="$THEME_ROOT/waybar/style.css"
+  local waybar_dir="$CONFIG_HOME/waybar"
+  local waybar_style="$waybar_dir/style.css"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$CONFIG_HOME/waybar"
-    rebar.sh &>/dev/null
+    mkdir -p "$waybar_dir"
+    cp -f "$theme_file" "$waybar_style"
+
+    if [[ -x "$SCRIPT_DIR/rebar.sh" ]]; then
+      if ! "$SCRIPT_DIR/rebar.sh" >/dev/null 2>&1; then
+        warn "failed to restart waybar; run $SCRIPT_DIR/rebar.sh manually"
+      fi
+    else
+      warn "rebar script not found or not executable: $SCRIPT_DIR/rebar.sh"
+    fi
   else
     warn "missing waybar theme"
   fi
@@ -486,10 +510,18 @@ apply_waybar() {
 
 apply_ghostty() {
   local theme_file="$THEME_ROOT/ghostty/theme"
+  local ghostty_dir="$CONFIG_HOME/ghostty"
+  local ghostty_theme="$ghostty_dir/theme"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$CONFIG_HOME/ghostty"
-    pkill -USR2 ghostty
+    mkdir -p "$ghostty_dir"
+    cp -f "$theme_file" "$ghostty_theme"
+
+    if pgrep -x ghostty >/dev/null 2>&1; then
+      if ! pkill -USR2 ghostty >/dev/null 2>&1; then
+        warn "failed to signal ghostty for theme reload"
+      fi
+    fi
   else
     warn "missing ghostty theme"
   fi
@@ -497,9 +529,12 @@ apply_ghostty() {
 
 apply_rofi() {
   local theme_file="$THEME_ROOT/rofi/theme.rasi"
+  local rofi_dir="$CONFIG_HOME/rofi"
+  local rofi_theme="$rofi_dir/theme.rasi"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$CONFIG_HOME/rofi"
+    mkdir -p "$rofi_dir"
+    cp -f "$theme_file" "$rofi_theme"
   else
     warn "missing rofi theme"
   fi
@@ -508,15 +543,21 @@ apply_rofi() {
 apply_wlogout() {
   local theme_file="$THEME_ROOT/wlogout/style.css"
   local icons_directory="$THEME_ROOT/wlogout/icons"
+  local wlogout_dir="$CONFIG_HOME/wlogout"
+  local wlogout_style="$wlogout_dir/style.css"
+  local wlogout_icons="$wlogout_dir/icons"
+
+  mkdir -p "$wlogout_dir"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$CONFIG_HOME/wlogout"
+    cp -f "$theme_file" "$wlogout_style"
   else
     warn "missing wlogout theme"
   fi
 
   if [[ -d "$icons_directory" ]]; then
-    cp -rf "$icons_directory" "$CONFIG_HOME/wlogout"
+    rm -rf "$wlogout_icons"
+    cp -Rf "$icons_directory" "$wlogout_icons"
   else
     warn "missing wlogout icons"
   fi
@@ -524,26 +565,45 @@ apply_wlogout() {
 
 apply_tmux() {
   local theme_file="$THEME_ROOT/tmux/theme.conf"
+  local tmux_dir="$CONFIG_HOME/tmux"
+  local tmux_theme="$tmux_dir/theme.conf"
+  local tmux_conf="$tmux_dir/tmux.conf"
+  local tpm_clean="$USER_HOME/.tmux/plugins/tpm/bin/clean_plugins"
+  local tpm_install="$USER_HOME/.tmux/plugins/tpm/bin/install_plugins"
 
   if [[ -f "$theme_file" ]]; then
-    cp -f "$theme_file" "$CONFIG_HOME/tmux"
+    mkdir -p "$tmux_dir"
+    cp -f "$theme_file" "$tmux_theme"
 
-    $USER_HOME/.tmux/plugins/tpm/bin/clean_plugins
-    $USER_HOME/.tmux/plugins/tpm/bin/install_plugins
+    if [[ -x "$tpm_clean" ]]; then
+      if ! "$tpm_clean" >/dev/null 2>&1; then
+        warn "tmux plugin cleanup failed"
+      fi
+    fi
 
-    tmux list-sessions -F '#{session_name}' | while read session; do tmux source-file $CONFIG_HOME/tmux/tmux.conf; done
+    if [[ -x "$tpm_install" ]]; then
+      if ! "$tpm_install" >/dev/null 2>&1; then
+        warn "tmux plugin install failed"
+      fi
+    fi
+
+    if command -v tmux >/dev/null 2>&1 && tmux list-sessions >/dev/null 2>&1; then
+      if ! tmux source-file "$tmux_conf" >/dev/null 2>&1; then
+        warn "failed to reload tmux config"
+      fi
+    fi
   else
     warn "missing tmux theme"
   fi
 }
 
-apply_qutebrowser
-apply_gtk
-apply_qt
-apply_wallpaper
-apply_waybar
-apply_ghostty
-apply_rofi
-apply_wlogout
-apply_tmux
-apply_sddm
+run_step "qutebrowser" apply_qutebrowser
+run_step "gtk" apply_gtk
+run_step "qt" apply_qt
+run_step "wallpaper" apply_wallpaper
+run_step "waybar" apply_waybar
+run_step "ghostty" apply_ghostty
+run_step "rofi" apply_rofi
+run_step "wlogout" apply_wlogout
+run_step "tmux" apply_tmux
+run_step "sddm" apply_sddm
