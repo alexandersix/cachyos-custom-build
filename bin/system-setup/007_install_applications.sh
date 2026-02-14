@@ -4,6 +4,7 @@ set -euo pipefail
 
 packages=(
   "btop"
+  "chromium"
   "eza"
   "fastfetch"
   "figlet"
@@ -42,7 +43,6 @@ aur_packages=(
   "localsend"
   "obs-studio"
   "obsidian"
-  "omarchy-chromium-bin"
   "python-hatchling"
   "selectdefaultapplication-git"
   "slack-desktop-wayland"
