@@ -112,6 +112,10 @@ if [[ ! -d "$THEME_ROOT" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$THEME_ROOT/nvim/theme.lua" ]]; then
+  warn "missing Neovim manifest: $THEME_ROOT/nvim/theme.lua (Neovim will fall back to habamax)"
+fi
+
 mkdir -p "$DATA_HOME"
 printf '%s\n' "$THEME_NAME" >"$CURRENT_THEME_FILE"
 
@@ -277,6 +281,45 @@ link_gtk4_assets() {
   fi
 }
 
+gtk_theme_exists() {
+  local theme_name="$1"
+  local theme_roots=(
+    "$USER_HOME/.themes"
+    "$DATA_HOME/themes"
+    "/usr/share/themes"
+  )
+  local root
+
+  if [[ -z "$theme_name" ]]; then
+    return 1
+  fi
+
+  for root in "${theme_roots[@]}"; do
+    if [[ -d "$root/$theme_name" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+ensure_gtk_theme_available() {
+  local fallback_theme="Adwaita-dark"
+
+  if gtk_theme_exists "$GTK_THEME_NAME"; then
+    return
+  fi
+
+  if ! gtk_theme_exists "$fallback_theme"; then
+    fallback_theme="Adwaita"
+  fi
+
+  warn "GTK theme '$GTK_THEME_NAME' not found; falling back to $fallback_theme to keep dark mode."
+  GTK_THEME_NAME="$fallback_theme"
+
+  sed -i "s/^gtk-theme-name=.*/gtk-theme-name=$GTK_THEME_NAME/" "$GTK_SETTINGS_3" "$GTK_SETTINGS_4"
+}
+
 apply_gtk() {
   local theme_settings_3="$THEME_ROOT/gtk/gtk-3.0/settings.ini"
   local theme_settings_4="$THEME_ROOT/gtk/gtk-4.0/settings.ini"
@@ -299,7 +342,8 @@ apply_gtk() {
     sync_root_gtk_dirs
   fi
 
-  read_gtk_settings "$theme_settings_3"
+  read_gtk_settings "$GTK_SETTINGS_3"
+  ensure_gtk_theme_available
   link_gtk4_assets
   apply_gsettings
   echo "note: GTK4 apps (e.g., Nautilus) may require a full restart: killall nautilus"
