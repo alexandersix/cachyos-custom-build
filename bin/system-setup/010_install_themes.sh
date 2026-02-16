@@ -7,6 +7,7 @@ packages=(
 )
 
 aur_packages=(
+  catppuccin-gtk-theme-mocha
   everforest-gtk-theme-git
   gruvbox-gtk-theme-git
   kanagawa-gtk-theme-git

@@ -1,0 +1,92 @@
+@define-color fg      #cdd6f4;
+@define-color bg      #1e1e2e;
+@define-color bgDim   #11111b;
+@define-color bgGreen #313244;
+@define-color red     #f38ba8;
+@define-color green   #a6e3a1;
+@define-color yellow  #f9e2af;
+@define-color blue    #89b4fa;
+@define-color aqua    #94e2d5;
+@define-color purple  #cba6f7;
+
+* {
+  border: none;
+  border-radius: 0;
+  font-family: "Iosevka", monospace;
+  font-weight: 400;
+  font-size: 14px;
+  min-height: 0;
+}
+
+*:hover {
+  border: none;
+  border-radius: 0;
+  font-family: "Iosevka", monospace;
+  font-size: 14px;
+  font-weight: 400;
+  min-height: 0;
+}
+
+window#waybar {
+  background-color: transparent;
+  color: @fg;
+}
+
+#waybar > box {
+  background-color: transparent;
+  border-radius: 12px;
+  margin: 12px 16px 0 16px;
+}
+
+.modules-left {
+  background-color: rgba(17, 17, 27, 0.85);
+  border-radius: 12px;
+  padding-right: 16px;
+}
+
+.modules-center {
+  background-color: rgba(17, 17, 27, 0.85);
+  border-radius: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.modules-right {
+  background-color: rgba(17, 17, 27, 0.85);
+  border-radius: 12px;
+  padding-left: 16px;
+}
+
+#workspaces button {
+  color: @blue;
+  border-bottom: 2px solid transparent;
+  margin-top: 2px;
+}
+
+#workspaces button:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+#workspaces button.active {
+  color: @yellow;
+  background-color: @bgGreen;
+}
+
+#workspaces button.hidden {
+  color: @fg;
+}
+
+#workspaces button.urgent {
+  background-color: @red;
+}
+
+button:hover {
+  background: @bg;
+  color: @fg;
+  border: 0 solid transparent;
+}
+
+#custom-notification {
+  padding: 0 5px;
+}

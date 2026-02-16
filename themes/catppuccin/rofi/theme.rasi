@@ -1,0 +1,102 @@
+/* ROFI SQUARED THEME USING THE CATPPUCCIN MOCHA PALETTE  */
+/* EDITED BY Alexander Six (https://github.com/alexandersix) */
+
+* {
+    font:   "Iosevka Regular 13";
+
+    bg0:     #11111baa;
+    bg1:     #1e1e2eaa;
+    fg0:     #cdd6f4;
+
+    accent-color:     #cba6f7;
+    highlight-color:     #313244;
+    urgent-color:     #f38ba8;
+
+    background-color:   transparent;
+    text-color:         @fg0;
+
+    margin:     0;
+    padding:    0;
+    spacing:    0;
+}
+
+window {
+    location:   center;
+    width:      750;
+
+    background-color:   @bg0;
+
+    border-radius: 12;
+}
+
+inputbar {
+    spacing:    8px;
+    padding:    20px 24px;
+
+    background-color:   @bg1;
+}
+
+prompt, entry, element-icon, element-text {
+    vertical-align: 0.5;
+}
+
+prompt {
+    text-color: @accent-color;
+}
+
+textbox {
+    padding:            8px;
+    background-color:   @bg1;
+}
+
+listview {
+    padding:    24px 16px;
+    lines:      8;
+    columns:    1;
+
+    fixed-height:   true;
+}
+
+element {
+    padding:    12px;
+    spacing:    8px;
+}
+
+element normal normal {
+    text-color: @fg0;
+}
+
+element normal urgent {
+    text-color: @urgent-color;
+}
+
+element normal active {
+    text-color: @accent-color;
+}
+
+element alternate active {
+    text-color: @accent-color;
+}
+
+element selected {
+    text-color: @fg0;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+element selected normal, element selected active {
+    background-color:   @highlight-color;
+}
+
+element selected urgent {
+    background-color:   @urgent-color;
+}
+
+element-icon {
+    size:   1em;
+    padding: 0 24px 0 0;
+}
+
+element-text {
+    text-color: inherit;
+}
