@@ -22,6 +22,7 @@ usage() {
   echo "  - If --all is provided, all packages are installed."
   echo "  - If --list is provided, packages are listed and no install is performed."
   echo "  - If neither package names nor --all are provided, nothing is installed."
+  echo "  - If the themes package is installed, the active theme is reapplied."
 }
 
 if [[ $# -lt 1 ]]; then
@@ -86,9 +87,36 @@ fi
 TARGET_DIR="$HOME/.config"
 mkdir -p "$TARGET_DIR"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APPLY_THEME_SCRIPT="$SCRIPT_DIR/apply-theme.sh"
+
 join_by_comma() {
   local IFS=", "
   echo "$*"
+}
+
+resolve_theme_to_apply() {
+  local fallback_theme="everforest"
+  local data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
+  local current_theme_file="$data_home/current-theme"
+  local theme_name=""
+
+  if [[ -r "$current_theme_file" ]]; then
+    IFS= read -r theme_name <"$current_theme_file" || true
+    theme_name="${theme_name%$'\r'}"
+  fi
+
+  if [[ -z "$theme_name" ]]; then
+    echo "Warning: unable to read current theme from $current_theme_file; falling back to $fallback_theme" >&2
+    theme_name="$fallback_theme"
+  fi
+
+  if [[ ! -d "$data_home/themes/$theme_name" ]]; then
+    echo "Warning: active theme '$theme_name' not found in $data_home/themes; falling back to $fallback_theme" >&2
+    theme_name="$fallback_theme"
+  fi
+
+  printf '%s\n' "$theme_name"
 }
 
 run() {
@@ -261,15 +289,29 @@ fi
 
 echo "------------------------------------------"
 
+THEMES_INSTALLED=0
+
 for package in "${INSTALL_PACKAGES[@]}"; do
   install_package "$package"
+
+  if [[ "$package" == "themes" ]]; then
+    THEMES_INSTALLED=1
+  fi
 done
 
 echo "------------------------------------------"
 
-if [[ "$INSTALL_ALL" -eq 1 ]]; then
-  echo "Installing default theme..."
-  apply-theme.sh everforest
+if [[ "$THEMES_INSTALLED" -eq 1 ]]; then
+  THEME_TO_APPLY="$(resolve_theme_to_apply)"
+
+  echo "Reapplying active theme: $THEME_TO_APPLY"
+
+  if [[ ! -x "$APPLY_THEME_SCRIPT" ]]; then
+    echo "Error: apply-theme.sh not found or not executable: $APPLY_THEME_SCRIPT"
+    exit 1
+  fi
+
+  "$APPLY_THEME_SCRIPT" "$THEME_TO_APPLY"
   echo "------------------------------------------"
 fi
 
