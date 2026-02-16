@@ -1,0 +1,7 @@
+[LockScreen]
+background = "polyscape_2.png"
+use-background-color = false
+
+[LoginScreen]
+background = "polyscape_2.png"
+use-background-color = false

@@ -31,6 +31,7 @@ packages=(
   "unzip"
   "wget"
   "yazi"
+  "zed"
 )
 
 aur_packages=(
@@ -47,7 +48,6 @@ aur_packages=(
   "selectdefaultapplication-git"
   "slack-desktop-wayland"
   "smug"
-  "zed-git"
 )
 
 # Must come before installing 1Password
