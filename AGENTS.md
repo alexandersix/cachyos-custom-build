@@ -10,13 +10,14 @@ Most files are config or shell scripts; there is no compiled code or test framew
 - `swaync/` SwayNC `config.json`, `configSchema.json`, and `style.css`
 - `wlogout/` menu `layout`, `style.css`, and icons
 - `rofi/` `config.rasi` and `theme.rasi`
+- `btop/` `btop.conf` and theme selection settings
 - `ghostty/` terminal `config` and `theme`
 - `tmux/` `tmux.conf`, `theme.conf`, and plugin submodules
 - `qutebrowser/` `config.py`, `themes/current.py`, bookmarks, quickmarks
 - `mpv/` `mpv.conf`
 - `sddm/` `sddm.conf` (installed to `/etc/sddm.conf`)
 - `way-displays/` `cfg.yaml` display layout config
-- `themes/` per-app theme assets (GTK/Qt/Waybar/Rofi/Wlogout/Ghostty/Tmux/Qutebrowser/SDDM)
+- `themes/` per-app theme assets (GTK/Qt/Waybar/Rofi/Wlogout/Ghostty/Tmux/Qutebrowser/Btop/SDDM)
 - `specs/` documentation and theming notes
 
 ## Environment Assumptions
@@ -26,7 +27,7 @@ Most files are config or shell scripts; there is no compiled code or test framew
 
 ## Common Scripts & Entrypoints
 - `bin/install_configs.sh <repo-root>` copies configs into `$HOME/.config`, backs up existing configs, and handles `/etc/sddm.conf` and `~/.local/share/themes`.
-- `bin/apply-theme.sh <theme> [--sync-root]` applies theme assets across GTK/Qt/Waybar/Rofi/Wlogout/Ghostty/Tmux/Qutebrowser/SDDM.
+- `bin/apply-theme.sh <theme> [--sync-root]` applies theme assets across GTK/Qt/Waybar/Rofi/Wlogout/Ghostty/Tmux/Qutebrowser/Btop/SDDM.
 - `bin/apply-gtk-qt-everforest.sh [--sync-root]` applies GTK/Qt settings directly (Everforest defaults).
 - `bin/setup.sh` and `bin/system-setup/*.sh` are manual system setup checklists/installers.
 - `bin/rebar.sh` restarts Waybar; `bin/start-waybar.sh` launches it.
@@ -43,6 +44,7 @@ Most files are config or shell scripts; there is no compiled code or test framew
 - Ghostty: relaunch Ghostty or send `pkill -USR2 ghostty` after editing `ghostty/theme`.
 - Tmux: `tmux source-file ~/.config/tmux/tmux.conf` to reload.
 - Qutebrowser: restart qutebrowser or run `:config-source` to reload `qutebrowser/config.py`.
+- Btop: launch/relaunch `btop` after switching themes to validate `btop/btop.conf` and `~/.config/btop/themes/current.theme`.
 - MPV: launch mpv to validate `mpv/mpv.conf`.
 - Optional: `shellcheck bin/*.sh` if ShellCheck is installed.
 

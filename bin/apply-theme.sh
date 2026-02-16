@@ -584,6 +584,33 @@ apply_rofi() {
   fi
 }
 
+apply_btop() {
+  local theme_file="$THEME_ROOT/btop/theme.theme"
+  local btop_dir="$CONFIG_HOME/btop"
+  local btop_theme_dir="$btop_dir/themes"
+  local btop_theme="$btop_theme_dir/current.theme"
+  local btop_conf="$btop_dir/btop.conf"
+
+  mkdir -p "$btop_theme_dir"
+
+  if [[ -f "$theme_file" ]]; then
+    cp -f "$theme_file" "$btop_theme"
+  else
+    warn "missing btop theme"
+    return
+  fi
+
+  if [[ -f "$btop_conf" ]]; then
+    if grep -q '^[[:space:]]*color_theme[[:space:]]*=' "$btop_conf"; then
+      sed -i 's|^[[:space:]]*color_theme[[:space:]]*=.*|color_theme = "current"|' "$btop_conf"
+    else
+      printf '\ncolor_theme = "current"\n' >>"$btop_conf"
+    fi
+  else
+    printf '%s\n' '# Theme value managed by six-os apply-theme.sh' 'color_theme = "current"' >"$btop_conf"
+  fi
+}
+
 apply_wlogout() {
   local theme_file="$THEME_ROOT/wlogout/style.css"
   local icons_directory="$THEME_ROOT/wlogout/icons"
@@ -648,6 +675,7 @@ run_step "wallpaper" apply_wallpaper
 run_step "waybar" apply_waybar
 run_step "ghostty" apply_ghostty
 run_step "rofi" apply_rofi
+run_step "btop" apply_btop
 run_step "wlogout" apply_wlogout
 run_step "tmux" apply_tmux
 run_step "sddm" apply_sddm
