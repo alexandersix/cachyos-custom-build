@@ -82,12 +82,30 @@ resolve_user_home() {
   echo "$home"
 }
 
+resolve_user_uid() {
+  local user="$1"
+  local uid=""
+
+  if [[ -n "$user" ]] && command -v id >/dev/null 2>&1; then
+    uid="$(id -u "$user" 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$uid" ]] && command -v id >/dev/null 2>&1; then
+    uid="$(id -u 2>/dev/null || true)"
+  fi
+
+  echo "$uid"
+}
+
 SCRIPT_PATH="$(resolve_path "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TARGET_USER="${SUDO_USER:-${USER:-}}"
 USER_HOME="${HOME:-}"
+TARGET_UID=""
+RUNTIME_DIR=""
+
 if [[ -z "$USER_HOME" && -n "$TARGET_USER" ]]; then
   USER_HOME="$(resolve_user_home "$TARGET_USER")"
 fi
@@ -99,6 +117,17 @@ fi
 if [[ -z "$USER_HOME" ]]; then
   echo "error: unable to resolve user home directory" >&2
   exit 1
+fi
+
+TARGET_UID="$(resolve_user_uid "$TARGET_USER")"
+if [[ -z "$TARGET_UID" ]]; then
+  echo "error: unable to resolve target user uid" >&2
+  exit 1
+fi
+
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$TARGET_UID}"
+if [[ "${EUID}" -eq 0 && -n "${SUDO_USER:-}" ]]; then
+  RUNTIME_DIR="/run/user/$TARGET_UID"
 fi
 
 CONFIG_HOME="${XDG_CONFIG_HOME:-$USER_HOME/.config}"
@@ -568,6 +597,33 @@ apply_ghostty() {
     fi
   else
     warn "missing ghostty theme"
+  fi
+}
+
+apply_neovim() {
+  local runtime_dir="$RUNTIME_DIR"
+  local socket=""
+  local expr="exists(':SixThemeReload') ? execute('silent! SixThemeReload') : ''"
+  local failed_count=0
+
+  if ! command -v nvim >/dev/null 2>&1; then
+    warn "nvim not found; skipping Neovim theme reload"
+    return
+  fi
+
+  for socket in "$runtime_dir"/nvim.*.*; do
+    if [[ ! -S "$socket" ]]; then
+      continue
+    fi
+
+    if ! nvim --server "$socket" --remote-expr "$expr" >/dev/null 2>&1; then
+      warn "failed to reload Neovim theme for socket: $socket"
+      failed_count=$((failed_count + 1))
+    fi
+  done
+
+  if [[ "$failed_count" -gt 0 ]]; then
+    warn "failed to reload $failed_count Neovim instance(s)"
   fi
 }
 
@@ -1053,6 +1109,7 @@ run_step "qt" apply_qt
 run_step "wallpaper" apply_wallpaper
 run_step "waybar" apply_waybar
 run_step "ghostty" apply_ghostty
+run_step "neovim" apply_neovim
 run_step "rofi" apply_rofi
 run_step "zed" apply_zed
 run_step "btop" apply_btop
