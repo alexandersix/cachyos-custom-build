@@ -1,6 +1,6 @@
 # six-os Agent Guide
 
-This repo is a personal Linux desktop setup with dotfiles and helper scripts for MangoWM, Waybar, SwayNC, Wlogout, Rofi, Ghostty, Tmux, and related theming.
+This repo is a personal Linux desktop setup with dotfiles and helper scripts for MangoWM, Waybar, SwayNC, Wlogout, Rofi, Ghostty, Tmux, Zed, and related theming.
 Most files are config or shell scripts; there is no compiled code or test framework.
 
 ## Repo Layout
@@ -14,10 +14,11 @@ Most files are config or shell scripts; there is no compiled code or test framew
 - `ghostty/` terminal `config` and `theme`
 - `tmux/` `tmux.conf`, `theme.conf`, and plugin submodules
 - `qutebrowser/` `config.py`, `themes/current.py`, bookmarks, quickmarks
+- `zed/` Zed `settings.json` and local theme loader settings
 - `mpv/` `mpv.conf`
 - `sddm/` `sddm.conf` (installed to `/etc/sddm.conf`)
 - `way-displays/` `cfg.yaml` display layout config
-- `themes/` per-app theme assets (GTK/Qt/Waybar/Rofi/Wlogout/Ghostty/Tmux/Qutebrowser/Btop/SDDM)
+- `themes/` per-app theme assets (GTK/Qt/Waybar/Rofi/Wlogout/Ghostty/Tmux/Qutebrowser/Zed/Btop/SDDM)
 - `specs/` documentation and theming notes
 
 ## Environment Assumptions
@@ -27,7 +28,7 @@ Most files are config or shell scripts; there is no compiled code or test framew
 
 ## Common Scripts & Entrypoints
 - `bin/install_configs.sh <repo-root>` copies configs into `$HOME/.config`, backs up existing configs, and handles `/etc/sddm.conf` and `~/.local/share/themes`.
-- `bin/apply-theme.sh <theme> [--sync-root]` applies theme assets across GTK/Qt/Waybar/Rofi/Wlogout/Ghostty/Tmux/Qutebrowser/Btop/SDDM.
+- `bin/apply-theme.sh <theme> [--sync-root]` applies theme assets across GTK/Qt/Waybar/Rofi/Wlogout/Ghostty/Tmux/Qutebrowser/Zed/Btop/SDDM.
 - `bin/apply-gtk-qt-everforest.sh [--sync-root]` applies GTK/Qt settings directly (Everforest defaults).
 - `bin/setup.sh` and `bin/system-setup/*.sh` are manual system setup checklists/installers.
 - `bin/rebar.sh` restarts Waybar; `bin/start-waybar.sh` launches it.
@@ -44,6 +45,7 @@ Most files are config or shell scripts; there is no compiled code or test framew
 - Ghostty: relaunch Ghostty or send `pkill -USR2 ghostty` after editing `ghostty/theme`.
 - Tmux: `tmux source-file ~/.config/tmux/tmux.conf` to reload.
 - Qutebrowser: restart qutebrowser or run `:config-source` to reload `qutebrowser/config.py`.
+- Zed: restart Zed after switching themes to pick up `~/.config/zed/themes/current.json`.
 - Btop: launch/relaunch `btop` after switching themes to validate `btop/btop.conf` and `~/.config/btop/themes/current.theme`.
 - MPV: launch mpv to validate `mpv/mpv.conf`.
 - Optional: `shellcheck bin/*.sh` if ShellCheck is installed.
@@ -117,6 +119,13 @@ Most files are config or shell scripts; there is no compiled code or test framew
 - Colors and font constants use `snake_case` and hex strings.
 - `themes/current.py` is applied by `bin/apply-theme.sh`; update `themes/<name>/qutebrowser/*.py` for theme sources.
 
+### Zed (`zed/settings.json`, `themes/<name>/zed/theme.json`, `themes/<name>/zed/preferred-theme`)
+- Use strict JSON with 2-space indentation and no trailing commas.
+- Keep theme file schema pinned to `https://zed.dev/schema/themes/v0.2.0.json`.
+- Use a stable runtime theme name (`Six OS Current`) so `bin/apply-theme.sh` can swap one `current.json` file.
+- Optional `preferred-theme` can declare an installed/bundled Zed theme name; fallback stays `Six OS Current`.
+- Keep terminal ANSI colors aligned with the theme's Ghostty palette where possible.
+
 ### Other Configs (Ghostty/MPV/SDDM)
 - Ghostty: one setting per line; keep blank lines between logical groups; follow local spacing around `=`.
 - MPV: INI-style `key=value` with `#` comments; keep sections grouped.
@@ -124,7 +133,7 @@ Most files are config or shell scripts; there is no compiled code or test framew
 
 ### Themes (`themes/<name>/...`)
 - Treat `themes/<name>` as the source of truth for theme assets used by `bin/apply-theme.sh`.
-- Keep per-app subpaths aligned with the script expectations (gtk/qt/waybar/rofi/wlogout/ghostty/tmux/qutebrowser/sddm).
+- Keep per-app subpaths aligned with the script expectations (gtk/qt/waybar/rofi/wlogout/ghostty/tmux/qutebrowser/zed/sddm).
 
 ## Naming Conventions
 - Script files: kebab-case in `bin/` (e.g., `start-waybar.sh`).
@@ -136,7 +145,7 @@ Most files are config or shell scripts; there is no compiled code or test framew
 - Update both config and any dependent scripts if you change keybinds.
 - If a script references a path, ensure the directory exists or create it.
 - If you add new packages, add them to the relevant `bin/system-setup/*.sh` list.
-- Keep theme colors and fonts consistent across Waybar, Rofi, SwayNC, and Qutebrowser.
+- Keep theme colors and fonts consistent across Waybar, Rofi, SwayNC, Qutebrowser, and Zed.
 - Note any required manual reload steps in your response.
 
 ## Cursor / Copilot Rules

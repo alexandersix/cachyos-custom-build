@@ -584,6 +584,385 @@ apply_rofi() {
   fi
 }
 
+trim_whitespace() {
+  local value="$1"
+
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+
+  printf '%s' "$value"
+}
+
+read_preferred_zed_themes() {
+  local preferred_theme_file="$1"
+  local line=""
+  local found=0
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%$'\r'}"
+    line="$(trim_whitespace "$line")"
+
+    if [[ -z "$line" || "$line" == \#* ]]; then
+      continue
+    fi
+
+    printf '%s\n' "$line"
+    found=1
+  done <"$preferred_theme_file"
+
+  if [[ "$found" -eq 1 ]]; then
+    return 0
+  fi
+
+  return 1
+}
+
+default_preferred_zed_themes() {
+  local theme_name="$1"
+
+  case "$theme_name" in
+  catppuccin)
+    printf '%s\n' "Catppuccin Mocha"
+    ;;
+  everforest)
+    printf '%s\n' "Everforest Dark Hard (blur)"
+    printf '%s\n' "Everforest Dark Medium (regular)"
+    ;;
+  gruvbox)
+    printf '%s\n' "Gruvbox Dark"
+    ;;
+  kanagawa)
+    printf '%s\n' "Kanagawa"
+    printf '%s\n' "Kanagawa Dragon"
+    printf '%s\n' "Kanagawa Wave"
+    ;;
+  tokyonight)
+    printf '%s\n' "Tokyo Night"
+    printf '%s\n' "Tokyo Night Storm"
+    ;;
+  *)
+    return 1
+    ;;
+  esac
+}
+
+collect_zed_theme_roots() {
+  local -a roots=(
+    "$CONFIG_HOME/zed/themes"
+    "$DATA_HOME/zed/themes"
+    "$DATA_HOME/zed/extensions/installed"
+    "/usr/share/zed/themes"
+    "/usr/local/share/zed/themes"
+    "/opt/zed/themes"
+    "/opt/zed.app/themes"
+    "/opt/zed.app/share/themes"
+    "$USER_HOME/.local/zed.app/themes"
+    "$USER_HOME/.local/zed.app/share/themes"
+    "$USER_HOME/.local/zed.app/assets/themes"
+  )
+  local zed_binary=""
+  local zed_bindir=""
+  local -a zed_binaries=()
+  local root=""
+  local -A seen=()
+
+  mapfile -t zed_binaries < <(collect_zed_binary_paths)
+
+  for zed_binary in "${zed_binaries[@]}"; do
+    zed_bindir="$(dirname "$zed_binary")"
+    roots+=(
+      "$zed_bindir/themes"
+      "$zed_bindir/assets/themes"
+      "$zed_bindir/share/themes"
+      "$zed_bindir/share/zed/themes"
+      "$zed_bindir/lib/themes"
+      "$zed_bindir/lib/zed/themes"
+      "$zed_bindir/lib/zed/assets/themes"
+      "$zed_bindir/libexec/themes"
+      "$zed_bindir/resources/themes"
+      "$zed_bindir/Resources/themes"
+      "$zed_bindir/../themes"
+      "$zed_bindir/../assets/themes"
+      "$zed_bindir/../share/themes"
+      "$zed_bindir/../share/zed/themes"
+      "$zed_bindir/../lib/themes"
+      "$zed_bindir/../lib/zed/themes"
+      "$zed_bindir/../lib/zed/assets/themes"
+      "$zed_bindir/../libexec/themes"
+      "$zed_bindir/../resources/themes"
+      "$zed_bindir/../Resources/themes"
+      "$zed_bindir/../../themes"
+      "$zed_bindir/../../assets/themes"
+      "$zed_bindir/../../share/themes"
+      "$zed_bindir/../../share/zed/themes"
+      "$zed_bindir/../../lib/themes"
+      "$zed_bindir/../../lib/zed/themes"
+      "$zed_bindir/../../lib/zed/assets/themes"
+      "$zed_bindir/../../libexec/themes"
+      "$zed_bindir/../../resources/themes"
+      "$zed_bindir/../../Resources/themes"
+    )
+  done
+
+  for root in "${roots[@]}"; do
+    if [[ -d "$root" && -z "${seen[$root]+x}" ]]; then
+      seen["$root"]=1
+      printf '%s\n' "$root"
+    fi
+  done
+}
+
+collect_zed_binary_paths() {
+  local -a binaries=()
+  local binary=""
+  local version_output=""
+  local version_path=""
+  local -A seen=()
+
+  if command -v zed >/dev/null 2>&1; then
+    binaries+=("$(resolve_path "$(command -v zed)")")
+  fi
+
+  if command -v zeditor >/dev/null 2>&1; then
+    binaries+=("$(resolve_path "$(command -v zeditor)")")
+
+    version_output="$(zeditor -v 2>/dev/null || true)"
+    version_path="${version_output##* – }"
+
+    if [[ "$version_path" == "$version_output" ]]; then
+      version_path="${version_output##* - }"
+    fi
+
+    version_path="$(trim_whitespace "$version_path")"
+
+    if [[ -n "$version_path" && -x "$version_path" ]]; then
+      binaries+=("$(resolve_path "$version_path")")
+    fi
+  fi
+
+  for binary in "${binaries[@]}"; do
+    if [[ -n "$binary" && -x "$binary" && -z "${seen[$binary]+x}" ]]; then
+      seen["$binary"]=1
+      printf '%s\n' "$binary"
+    fi
+  done
+}
+
+zed_builtin_theme_exists() {
+  local theme_name="$1"
+  local zed_binary=""
+  local -a zed_binaries=()
+
+  if [[ -z "$theme_name" ]]; then
+    return 1
+  fi
+
+  mapfile -t zed_binaries < <(collect_zed_binary_paths)
+
+  if [[ "${#zed_binaries[@]}" -eq 0 ]]; then
+    return 1
+  fi
+
+  for zed_binary in "${zed_binaries[@]}"; do
+    if grep -aFq "$theme_name" "$zed_binary" 2>/dev/null; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+zed_theme_exists() {
+  local theme_name="$1"
+  local -a zed_theme_roots=()
+  local can_parse_json=1
+  local root=""
+  local theme_file=""
+
+  if [[ -z "$theme_name" ]]; then
+    return 1
+  fi
+
+  if ! command -v jq >/dev/null 2>&1; then
+    warn "jq not found; cannot validate preferred Zed themes."
+    can_parse_json=0
+  fi
+
+  mapfile -t zed_theme_roots < <(collect_zed_theme_roots)
+
+  if [[ "$can_parse_json" -eq 1 && "${#zed_theme_roots[@]}" -gt 0 ]]; then
+    for root in "${zed_theme_roots[@]}"; do
+      while IFS= read -r -d '' theme_file; do
+        if jq -e --arg theme_name "$theme_name" '
+          (.themes // [])
+          | if type == "array" then
+              any(.[]?; ((.name? // "") == $theme_name))
+            else
+              false
+            end
+        ' "$theme_file" >/dev/null 2>&1; then
+          return 0
+        fi
+      done < <(find "$root" -type f -name '*.json' -print0 2>/dev/null)
+    done
+  fi
+
+  if [[ "${#zed_theme_roots[@]}" -gt 0 ]]; then
+    for root in "${zed_theme_roots[@]}"; do
+      while IFS= read -r -d '' theme_file; do
+        if grep -aFq "\"name\": \"$theme_name\"" "$theme_file" 2>/dev/null; then
+          return 0
+        fi
+      done < <(find "$root" -type f -name '*.json' -print0 2>/dev/null)
+    done
+  fi
+
+  if zed_builtin_theme_exists "$theme_name"; then
+    return 0
+  fi
+
+  return 1
+}
+
+set_zed_dark_theme() {
+  local settings_file="$1"
+  local dark_theme="$2"
+  local settings_dir=""
+  local tmp_settings=""
+
+  settings_dir="$(dirname "$settings_file")"
+  mkdir -p "$settings_dir"
+
+  if ! command -v jq >/dev/null 2>&1; then
+    warn "jq not found; writing minimal Zed settings."
+
+    if ! printf '%s\n' '{' '  "theme": {' '    "mode": "dark",' "    \"dark\": \"$dark_theme\"," '    "light": "One Light"' '  }' '}' >"$settings_file"; then
+      warn "failed to write Zed settings file: $settings_file"
+      return 1
+    fi
+
+    return 0
+  fi
+
+  tmp_settings="$(mktemp)"
+
+  if [[ -f "$settings_file" ]]; then
+    if ! jq --arg dark_theme "$dark_theme" '
+      (if type == "object" then . else {} end) as $cfg
+      | $cfg
+      | .theme = {
+          mode: "dark",
+          dark: $dark_theme,
+          light: (
+            if ($cfg.theme | type == "object")
+              and (($cfg.theme.light? // "") | type == "string")
+              and (($cfg.theme.light? // "") != "")
+            then $cfg.theme.light
+            else "One Light"
+            end
+          )
+        }
+    ' "$settings_file" >"$tmp_settings"; then
+      warn "failed to parse $settings_file; recreating with defaults"
+      if ! jq -n --arg dark_theme "$dark_theme" '
+        {
+          theme: {
+            mode: "dark",
+            dark: $dark_theme,
+            light: "One Light"
+          }
+        }
+      ' >"$tmp_settings"; then
+        rm -f "$tmp_settings"
+        warn "failed to update Zed settings in $settings_file"
+        return 1
+      fi
+    fi
+  else
+    if ! jq -n --arg dark_theme "$dark_theme" '
+      {
+        theme: {
+          mode: "dark",
+          dark: $dark_theme,
+          light: "One Light"
+        }
+      }
+    ' >"$tmp_settings"; then
+      rm -f "$tmp_settings"
+      warn "failed to create Zed settings in $settings_file"
+      return 1
+    fi
+  fi
+
+  if ! mv "$tmp_settings" "$settings_file"; then
+    rm -f "$tmp_settings"
+    warn "failed to write Zed settings file: $settings_file"
+    return 1
+  fi
+
+  return 0
+}
+
+apply_zed() {
+  local theme_file="$THEME_ROOT/zed/theme.json"
+  local preferred_theme_file="$THEME_ROOT/zed/preferred-theme"
+  local repo_preferred_theme_file="$REPO_ROOT/themes/$THEME_NAME/zed/preferred-theme"
+  local zed_dir="$CONFIG_HOME/zed"
+  local zed_theme_dir="$zed_dir/themes"
+  local zed_theme="$zed_theme_dir/current.json"
+  local zed_settings="$zed_dir/settings.json"
+  local fallback_theme_name="Six OS Current"
+  local selected_theme_name="$fallback_theme_name"
+  local preferred_theme_name=""
+  local preferred_theme_source=""
+  local -a preferred_theme_candidates=()
+
+  mkdir -p "$zed_theme_dir"
+
+  if [[ -f "$theme_file" ]]; then
+    cp -f "$theme_file" "$zed_theme"
+  else
+    warn "missing zed fallback theme: $theme_file"
+  fi
+
+  if [[ -f "$preferred_theme_file" ]]; then
+    preferred_theme_source="$preferred_theme_file"
+  elif [[ -f "$repo_preferred_theme_file" ]]; then
+    preferred_theme_source="$repo_preferred_theme_file"
+  fi
+
+  if [[ -n "$preferred_theme_source" ]]; then
+    mapfile -t preferred_theme_candidates < <(read_preferred_zed_themes "$preferred_theme_source" || true)
+
+    if [[ "${#preferred_theme_candidates[@]}" -eq 0 ]]; then
+      warn "preferred Zed theme file is empty: $preferred_theme_source"
+    fi
+  fi
+
+  if [[ "${#preferred_theme_candidates[@]}" -eq 0 ]]; then
+    mapfile -t preferred_theme_candidates < <(default_preferred_zed_themes "$THEME_NAME" || true)
+  fi
+
+  if [[ "${#preferred_theme_candidates[@]}" -gt 0 ]]; then
+    for preferred_theme_name in "${preferred_theme_candidates[@]}"; do
+      if zed_theme_exists "$preferred_theme_name"; then
+        selected_theme_name="$preferred_theme_name"
+        break
+      fi
+    done
+
+    if [[ "$selected_theme_name" == "$fallback_theme_name" ]]; then
+      warn "no preferred Zed theme found for '$THEME_NAME'; using $fallback_theme_name"
+    fi
+  fi
+
+  set_zed_dark_theme "$zed_settings" "$selected_theme_name" || true
+
+  if pgrep -x zed >/dev/null 2>&1; then
+    warn "Zed is running; restart Zed to reload local themes."
+  fi
+}
+
 apply_btop() {
   local theme_file="$THEME_ROOT/btop/theme.theme"
   local btop_dir="$CONFIG_HOME/btop"
@@ -675,6 +1054,7 @@ run_step "wallpaper" apply_wallpaper
 run_step "waybar" apply_waybar
 run_step "ghostty" apply_ghostty
 run_step "rofi" apply_rofi
+run_step "zed" apply_zed
 run_step "btop" apply_btop
 run_step "wlogout" apply_wlogout
 run_step "tmux" apply_tmux

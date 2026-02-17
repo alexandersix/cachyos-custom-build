@@ -22,7 +22,7 @@ usage() {
   echo "  - If --all is provided, all packages are installed."
   echo "  - If --list is provided, packages are listed and no install is performed."
   echo "  - If neither package names nor --all are provided, nothing is installed."
-  echo "  - If the themes package is installed, the active theme is reapplied."
+  echo "  - If the themes or zed package is installed, the active theme is reapplied."
 }
 
 if [[ $# -lt 1 ]]; then
@@ -108,15 +108,24 @@ resolve_theme_to_apply() {
 
   if [[ -z "$theme_name" ]]; then
     echo "Warning: unable to read current theme from $current_theme_file; falling back to $fallback_theme" >&2
-    theme_name="$fallback_theme"
   fi
 
-  if [[ ! -d "$data_home/themes/$theme_name" ]]; then
+  if [[ -n "$theme_name" && -d "$data_home/themes/$theme_name" ]]; then
+    printf '%s\n' "$theme_name"
+    return
+  fi
+
+  if [[ -n "$theme_name" ]]; then
     echo "Warning: active theme '$theme_name' not found in $data_home/themes; falling back to $fallback_theme" >&2
-    theme_name="$fallback_theme"
   fi
 
-  printf '%s\n' "$theme_name"
+  if [[ -d "$data_home/themes/$fallback_theme" ]]; then
+    printf '%s\n' "$fallback_theme"
+    return
+  fi
+
+  echo "Warning: no installed themes found in $data_home/themes; skipping theme reapply" >&2
+  printf '\n'
 }
 
 run() {
@@ -290,6 +299,7 @@ fi
 echo "------------------------------------------"
 
 THEMES_INSTALLED=0
+ZED_INSTALLED=0
 
 for package in "${INSTALL_PACKAGES[@]}"; do
   install_package "$package"
@@ -297,22 +307,30 @@ for package in "${INSTALL_PACKAGES[@]}"; do
   if [[ "$package" == "themes" ]]; then
     THEMES_INSTALLED=1
   fi
+
+  if [[ "$package" == "zed" ]]; then
+    ZED_INSTALLED=1
+  fi
 done
 
 echo "------------------------------------------"
 
-if [[ "$THEMES_INSTALLED" -eq 1 ]]; then
+if [[ "$THEMES_INSTALLED" -eq 1 || "$ZED_INSTALLED" -eq 1 ]]; then
   THEME_TO_APPLY="$(resolve_theme_to_apply)"
 
-  echo "Reapplying active theme: $THEME_TO_APPLY"
+  if [[ -z "$THEME_TO_APPLY" ]]; then
+    echo "Skipping active theme reapply"
+  else
+    echo "Reapplying active theme: $THEME_TO_APPLY"
 
-  if [[ ! -x "$APPLY_THEME_SCRIPT" ]]; then
-    echo "Error: apply-theme.sh not found or not executable: $APPLY_THEME_SCRIPT"
-    exit 1
+    if [[ ! -x "$APPLY_THEME_SCRIPT" ]]; then
+      echo "Error: apply-theme.sh not found or not executable: $APPLY_THEME_SCRIPT"
+      exit 1
+    fi
+
+    "$APPLY_THEME_SCRIPT" "$THEME_TO_APPLY"
+    echo "------------------------------------------"
   fi
-
-  "$APPLY_THEME_SCRIPT" "$THEME_TO_APPLY"
-  echo "------------------------------------------"
 fi
 
 echo "Done!"
