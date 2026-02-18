@@ -10,6 +10,7 @@ set -euo pipefail
 # - -p portal (????) - wlroots 0.20 needed
 
 OUTPUT_DIR="$HOME/Videos/Screencasts"
+WAYBAR_SCREENRECORD_SIGNAL=8
 
 if [[ ! -d "$OUTPUT_DIR" ]]; then
   notify-send "Screen recording directory does not exist: $OUTPUT_DIR" -u critical -t 3000
@@ -29,14 +30,29 @@ done
 # $1 - monitor name
 start_screenrecording() {
   local filename="$OUTPUT_DIR/screenrecording-$(date +'%Y-%m-%d_%H-%M-%S').mp4"
+  local region=""
 
   if [[ -z "$1" ]]; then
-    gpu-screen-recorder -w region -region "$(slurp -f "%wx%h+%x+%y")" -o "$filename"
+    if ! region="$(slurp -f "%wx%h+%x+%y")"; then
+      return 0
+    fi
+
+    if [[ -z "$region" ]]; then
+      return 0
+    fi
+
+    gpu-screen-recorder -w region -region "$region" -o "$filename" &
   else
-    gpu-screen-recorder -w "$1" -o "$filename"
+    gpu-screen-recorder -w "$1" -o "$filename" &
   fi
 
+  signal_waybar_screenrecord
 }
+
+signal_waybar_screenrecord() {
+  pkill -RTMIN+"$WAYBAR_SCREENRECORD_SIGNAL" -x waybar >/dev/null 2>&1 || true
+}
+
 #
 stop_screenrecording() {
   pkill -SIGINT -f "^gpu-screen-recorder" # SIGINT required to save video properly
@@ -54,6 +70,8 @@ stop_screenrecording() {
   else
     notify-send "Screen recording saved to $OUTPUT_DIR" -t 2000
   fi
+
+  signal_waybar_screenrecord
 }
 
 screenrecording_active() {

@@ -92,3 +92,8 @@ button:hover {
 #custom-notification {
   padding: 0 5px;
 }
+
+#custom-screenrecord {
+  color: @red;
+  padding: 0 0 0 6px;
+}

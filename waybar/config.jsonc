@@ -3,7 +3,7 @@
   "position": "top", // Waybar position (top|bottom|left|right)
   "spacing": 24, // Gaps between modules (4px)
   "modules-left": ["ext/workspaces", "dwl/window#layout"],
-  "modules-center": ["clock"],
+  "modules-center": ["clock", "custom/screenrecord"],
   "modules-right": [
     "pulseaudio",
     "network",
@@ -96,6 +96,13 @@
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "format": "{:%b %d | %H:%M}",
     "format-alt": "{:%Y-%m-%d}",
+  },
+  "custom/screenrecord": {
+    "exec-if": "pgrep -f '^gpu-screen-recorder' >/dev/null",
+    "exec": "printf '●'",
+    "interval": 1,
+    "signal": 8,
+    "tooltip": false,
   },
   "cpu": {
     "format": "{usage}% ",
