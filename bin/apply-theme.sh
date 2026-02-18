@@ -1025,6 +1025,9 @@ apply_btop() {
   local btop_theme_dir="$btop_dir/themes"
   local btop_theme="$btop_theme_dir/current.theme"
   local btop_conf="$btop_dir/btop.conf"
+  local -a btop_pids=()
+  local pid=""
+  local failed_count=0
 
   mkdir -p "$btop_theme_dir"
 
@@ -1043,6 +1046,27 @@ apply_btop() {
     fi
   else
     printf '%s\n' '# Theme value managed by six-os apply-theme.sh' 'color_theme = "current"' >"$btop_conf"
+  fi
+
+  if ! command -v pgrep >/dev/null 2>&1; then
+    warn "pgrep not found; skipping btop reload"
+    return
+  fi
+
+  mapfile -t btop_pids < <(pgrep -x -u "$TARGET_UID" btop || true)
+  if [[ "${#btop_pids[@]}" -eq 0 ]]; then
+    return
+  fi
+
+  for pid in "${btop_pids[@]}"; do
+    if ! kill -s SIGUSR2 "$pid" >/dev/null 2>&1; then
+      warn "failed to signal btop for theme reload (pid: $pid)"
+      failed_count=$((failed_count + 1))
+    fi
+  done
+
+  if [[ "$failed_count" -gt 0 ]]; then
+    warn "failed to reload $failed_count btop instance(s)"
   fi
 }
 
