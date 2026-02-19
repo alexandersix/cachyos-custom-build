@@ -14,6 +14,7 @@ packages=(
   "ghostty"
   "git"
   "github-cli"
+  "gnome-calendar"
   "gum"
   "gvfs"
   "imagemagick"
