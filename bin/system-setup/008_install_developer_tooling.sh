@@ -51,8 +51,8 @@ git config --global user.name "Alex Six"
 
 # TUI DB manager
 uv tool install harlequin
-uv tool install 'harlequin[postgres]'
 uv tool install 'harlequin[mysql]'
+uv tool install 'harlequin[postgres]'
 
 # Spin (Laravel Docker environment)
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/serversideup/spin/main/tools/install.sh)"
