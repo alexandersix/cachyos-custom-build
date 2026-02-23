@@ -6,3 +6,6 @@ vim.g.lazyvim_php_lsp = "intelephense"
 
 -- Disable swapfiles
 vim.opt.swapfile = false -- disable swap files
+
+-- Prettier requires local config to run
+vim.g.lazyvim_prettier_needs_config = false

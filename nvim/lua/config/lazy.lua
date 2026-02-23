@@ -30,7 +30,7 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.editor.outline" },
 
     -- Formatting
-    { import = "lazyvim.plugins.extras.formatting.prettier" },
+    { import = "lazyvim.plugins.extras.formatting.prettierd" },
 
     -- Languages
     { import = "lazyvim.plugins.extras.lang.astro" },
