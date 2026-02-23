@@ -13,6 +13,7 @@ packages=(
 )
 
 aur_packages=(
+  "pie" # Modern PHP extension installer
   "tableplus"
   "uv"
 )
