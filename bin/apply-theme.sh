@@ -280,9 +280,45 @@ link_gtk4_assets() {
     "$DATA_HOME/themes"
     "/usr/share/themes"
   )
+  local custom_theme_dir="$THEME_ROOT/gtk/gtk-4.0"
   local theme_dir=""
+  local custom_assets_found=0
+  local entry=""
   local root
   local candidate
+
+  if [[ -d "$custom_theme_dir" ]]; then
+    for entry in "$custom_theme_dir"/*; do
+      if [[ ! -e "$entry" ]]; then
+        continue
+      fi
+
+      if [[ "$(basename "$entry")" == "settings.ini" ]]; then
+        continue
+      fi
+
+      custom_assets_found=1
+      break
+    done
+  fi
+
+  if [[ "$custom_assets_found" -eq 1 ]]; then
+    mkdir -p "$GTK_SETTINGS_DIR_4"
+
+    for entry in "$custom_theme_dir"/*; do
+      if [[ ! -e "$entry" ]]; then
+        continue
+      fi
+
+      if [[ "$(basename "$entry")" == "settings.ini" ]]; then
+        continue
+      fi
+
+      ln -nfs "$entry" "$GTK_SETTINGS_DIR_4/$(basename "$entry")"
+    done
+
+    return
+  fi
 
   if [[ -z "$GTK_THEME_NAME" ]]; then
     warn "GTK theme name missing; skipping GTK4 asset links."
@@ -491,11 +527,17 @@ apply_sddm() {
     return
   fi
 
-  local shopt_state
-  shopt_state="$(shopt -p nullglob nocaseglob)"
-  shopt -s nullglob nocaseglob
-  wallpaper_candidates=("$wallpaper_dir"/*.{png,jpg,jpeg,webp,gif,bmp})
-  eval "$shopt_state"
+  local ext=""
+  local file=""
+  for ext in png jpg jpeg webp gif bmp; do
+    for file in "$wallpaper_dir"/*."$ext" "$wallpaper_dir"/*."${ext^^}"; do
+      if [[ ! -e "$file" ]]; then
+        continue
+      fi
+
+      wallpaper_candidates+=("$file")
+    done
+  done
 
   if [[ ${#wallpaper_candidates[@]} -eq 0 ]]; then
     warn "no wallpapers found in: $wallpaper_dir"
@@ -578,6 +620,23 @@ apply_waybar() {
     fi
   else
     warn "missing waybar theme"
+  fi
+}
+
+apply_swaync() {
+  local theme_file="$THEME_ROOT/swaync/style.css"
+  local swaync_dir="$CONFIG_HOME/swaync"
+  local swaync_style="$swaync_dir/style.css"
+
+  if [[ -f "$theme_file" ]]; then
+    mkdir -p "$swaync_dir"
+    cp -f "$theme_file" "$swaync_style"
+
+    if pgrep -x swaync >/dev/null 2>&1; then
+      warn "swaync is running; restart swaync to apply the updated style"
+    fi
+  else
+    warn "missing swaync theme"
   fi
 }
 
@@ -1132,6 +1191,7 @@ run_step "gtk" apply_gtk
 run_step "qt" apply_qt
 run_step "wallpaper" apply_wallpaper
 run_step "waybar" apply_waybar
+run_step "swaync" apply_swaync
 run_step "ghostty" apply_ghostty
 run_step "neovim" apply_neovim
 run_step "rofi" apply_rofi

@@ -1,0 +1,73 @@
+@import url("resource:///org/gnome/theme/gtk-dark.css");
+
+@define-color accent_color #b4bcc4;
+@define-color accent_bg_color #3d424a;
+@define-color accent_fg_color #f0efeb;
+
+@define-color destructive_color #cdacac;
+@define-color destructive_bg_color #cdacac;
+@define-color destructive_fg_color #1a1d21;
+
+@define-color success_color #b8c4b8;
+@define-color success_bg_color #b8c4b8;
+@define-color success_fg_color #1a1d21;
+
+@define-color warning_color #d4ccb4;
+@define-color warning_bg_color #d4ccb4;
+@define-color warning_fg_color #1a1d21;
+
+@define-color window_bg_color #1a1d21;
+@define-color window_fg_color #f0efeb;
+@define-color view_bg_color #1a1d21;
+@define-color view_fg_color #f0efeb;
+@define-color headerbar_bg_color #22262b;
+@define-color headerbar_fg_color #f0efeb;
+@define-color sidebar_bg_color #171a1e;
+@define-color sidebar_fg_color #e0dcd4;
+@define-color popover_bg_color #22262b;
+@define-color popover_fg_color #f0efeb;
+@define-color card_bg_color #22262b;
+@define-color card_fg_color #f0efeb;
+@define-color dialog_bg_color #1a1d21;
+@define-color dialog_fg_color #f0efeb;
+
+@define-color borders #3d424a;
+@define-color outline_color alpha(#f0efeb, 0.2);
+
+window,
+.background {
+  background-color: @window_bg_color;
+  color: @window_fg_color;
+}
+
+headerbar,
+.titlebar {
+  background-color: @headerbar_bg_color;
+  color: @headerbar_fg_color;
+  box-shadow: inset 0 -1px @borders;
+}
+
+.view,
+entry,
+spinbutton,
+textview > text {
+  background-color: #0f1114;
+  color: @view_fg_color;
+  border-color: @borders;
+}
+
+button {
+  background-color: #22262b;
+  color: @window_fg_color;
+  border-color: @borders;
+}
+
+button:hover {
+  background-color: #2b3037;
+}
+
+button:active,
+button:checked {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+}
