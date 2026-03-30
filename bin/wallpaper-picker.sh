@@ -18,7 +18,7 @@ require_command() {
   fi
 }
 
-for cmd in rofi convert swww; do
+for cmd in rofi convert awww; do
   require_command "$cmd"
 done
 
@@ -103,4 +103,4 @@ if [[ ! -f "$selected_wallpaper" ]]; then
   exit 1
 fi
 
-exec swww img -t any --transition-fps 60 "$selected_wallpaper"
+exec awww img -t any --transition-fps 60 "$selected_wallpaper"

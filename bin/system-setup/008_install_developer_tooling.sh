@@ -64,3 +64,6 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/serversideup/spin/main/t
 # 1. Install `ca-certificate-utils` with pacman (done in an early setup script)
 # 2. `sudo cp /path/to/your/custom.crt /etc/ca-certificates/trust-source/anchors/`
 # 3. `sudo trust extract-compat`
+
+# Install Devbox
+curl -fsSL https://get.jetify.com/devbox | bash

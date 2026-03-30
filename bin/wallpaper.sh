@@ -47,7 +47,7 @@ while IFS= read -r query_line; do
     current_wallpaper="${BASH_REMATCH[1]}"
     break
   fi
-done < <(swww query 2>/dev/null || true)
+done < <(awww query 2>/dev/null || true)
 
 if [[ -n "$current_wallpaper" ]]; then
   current_wallpaper_name="$(basename -- "$current_wallpaper")"
@@ -66,4 +66,4 @@ for i in "${!wallpapers[@]}"; do
   fi
 done
 
-swww img -t any --transition-fps 60 "$selected"
+awww img -t any --transition-fps 60 "$selected"

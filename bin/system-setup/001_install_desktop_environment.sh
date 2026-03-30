@@ -20,7 +20,7 @@ packages=(
   "qt6-wayland"
   "sassc"
   "solaar"
-  "swww"
+  "awww"
   "ttc-iosevka"
   "ttf-font-awesome"
   "ttf-jetbrains-mono-nerd"
